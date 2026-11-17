@@ -7,10 +7,25 @@ const CATEGORIES = ["tree", "topper", "background", "ornament", "effect"];
 
 function getDisplayName(pathname) {
   const fileName = pathname.split("/").pop() || "image.png";
-  const withoutId = fileName.includes("__") ? fileName.split("__").slice(1).join("__") : fileName;
-  const withoutExtension = withoutId.toLowerCase().endsWith(".png") ? withoutId.slice(0, -4) : withoutId;
-  try { return decodeURIComponent(withoutExtension).replace(/[_-]+/g, " "); }
-  catch { return withoutExtension.replace(/[_-]+/g, " "); }
+  const separator = fileName.indexOf("__");
+
+  if (separator > 0) {
+    const uploadId = fileName.slice(0, separator);
+    const encodedLabel = fileName.slice(separator + 2).replace(/\\.png$/i, "");
+
+    // New uploads store the user-entered Korean option label as base64url.
+    if (/^[0-9a-f-]{32,36}$/i.test(uploadId)) {
+      try {
+        const decoded = Buffer.from(encodedLabel, "base64url").toString("utf8").trim();
+        if (decoded && !decoded.includes("\\uFFFD")) return decoded;
+      } catch {}
+    }
+
+    // Keep labels for files uploaded before editable option names were added.
+    return encodedLabel.replace(/[_-]+/g, " ");
+  }
+
+  return fileName.replace(/\\.png$/i, "").replace(/[_-]+/g, " ");
 }
 
 function getAccessMode(url) {
