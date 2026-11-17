@@ -14,9 +14,16 @@ function getDisplayName(pathname) {
 }
 
 export async function GET() {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  const hasOidcConnection = Boolean(process.env.VERCEL_OIDC_TOKEN && process.env.BLOB_STORE_ID);
+  const hasReadWriteToken = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+
+  if (!hasOidcConnection && !hasReadWriteToken) {
     return Response.json(
-      { assets: [], configured: false, error: "Vercel Blob 저장소가 아직 연결되지 않았어요." },
+      {
+        assets: [],
+        configured: false,
+        error: "Blob 연결 인증 정보가 없어요. 저장소 Projects에서 Production 환경 연결을 확인해 주세요.",
+      },
       { status: 503, headers: { "Cache-Control": "no-store" } },
     );
   }
