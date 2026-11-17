@@ -8,7 +8,9 @@ const CATEGORIES = ["tree", "background", "ornament", "effect"];
 function getDisplayName(pathname) {
   const fileName = pathname.split("/").pop() || "image.png";
   const withoutId = fileName.includes("__") ? fileName.split("__").slice(1).join("__") : fileName;
-  return decodeURIComponent(withoutId.replace(/\\.png$/i, "")).replace(/[_-]+/g, " ");
+  const withoutExtension = withoutId.toLowerCase().endsWith(".png") ? withoutId.slice(0, -4) : withoutId;
+  try { return decodeURIComponent(withoutExtension).replace(/[_-]+/g, " "); }
+  catch { return withoutExtension.replace(/[_-]+/g, " "); }
 }
 
 export async function GET() {
@@ -21,22 +23,23 @@ export async function GET() {
 
   try {
     const result = await list({ prefix: "assets/", limit: 1000 });
-    const assets = result.blobs
-      .map((blob) => {
-        const match = blob.pathname.match(/^assets\\/(tree|background|ornament|effect)\\//);
-        if (!match || !/\\.png$/i.test(blob.pathname)) return null;
-        return {
-          id: blob.pathname,
-          pathname: blob.pathname,
-          category: match[1],
-          name: getDisplayName(blob.pathname),
-          url: blob.url,
-          size: blob.size,
-          uploadedAt: blob.uploadedAt,
-        };
-      })
-      .filter(Boolean)
-      .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+    const assets = result.blobs.map((blob) => {
+      const parts = blob.pathname.split("/");
+      const category = parts[1];
+      const fileName = parts[2] || "";
+      if (parts.length !== 3 || parts[0] !== "assets" || !CATEGORIES.includes(category) || !fileName.toLowerCase().endsWith(".png")) {
+        return null;
+      }
+      return {
+        id: blob.pathname,
+        pathname: blob.pathname,
+        category,
+        name: getDisplayName(blob.pathname),
+        url: blob.url,
+        size: blob.size,
+        uploadedAt: blob.uploadedAt,
+      };
+    }).filter(Boolean).sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
 
     return Response.json(
       { assets, configured: true },
