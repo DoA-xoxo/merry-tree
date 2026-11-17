@@ -1,10 +1,9 @@
-import { issueSignedToken, list, presignUrl } from "@vercel/blob";
+import { list } from "@vercel/blob";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const CATEGORIES = ["tree", "topper", "background", "ornament", "effect"];
-const READ_URL_TTL_MS = 6 * 24 * 60 * 60 * 1000;
 
 function getDisplayName(pathname) {
   const fileName = pathname.split("/").pop() || "image.png";
@@ -24,10 +23,7 @@ function getAccessMode(url) {
 }
 
 export async function GET() {
-  const hasOidcConnection = Boolean(process.env.BLOB_STORE_ID);
-  const hasReadWriteToken = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
-
-  if (!hasOidcConnection && !hasReadWriteToken) {
+  if (!process.env.BLOB_STORE_ID && !process.env.BLOB_READ_WRITE_TOKEN) {
     return Response.json(
       {
         assets: [],
@@ -40,58 +36,31 @@ export async function GET() {
 
   try {
     const result = await list({ prefix: "assets/", limit: 1000 });
-    const validBlobs = result.blobs.filter((blob) => {
+    const assets = result.blobs.map((blob) => {
       const parts = blob.pathname.split("/");
       const category = parts[1];
       const fileName = parts[2] || "";
-      return parts.length === 3 &&
-        parts[0] === "assets" &&
-        CATEGORIES.includes(category) &&
-        fileName.toLowerCase().endsWith(".png");
-    });
+      if (
+        parts.length !== 3 ||
+        parts[0] !== "assets" ||
+        !CATEGORIES.includes(category) ||
+        !fileName.toLowerCase().endsWith(".png")
+      ) return null;
 
-    const privateBlobs = validBlobs.filter((blob) => getAccessMode(blob.url) === "private");
-    const validUntil = Date.now() + READ_URL_TTL_MS;
-    const privateReadToken = privateBlobs.length
-      ? await issueSignedToken({
-          pathname: "*",
-          operations: ["get"],
-          validUntil,
-        })
-      : null;
-
-    const assets = await Promise.all(validBlobs.map(async (blob) => {
-      const parts = blob.pathname.split("/");
-      const category = parts[1];
       const accessMode = getAccessMode(blob.url);
-      let displayUrl = blob.url;
-      let isSignedUrl = false;
-
-      if (accessMode === "private" && privateReadToken) {
-        const signed = await presignUrl(privateReadToken, {
-          operation: "get",
-          pathname: blob.pathname,
-          access: "private",
-          validUntil,
-        });
-        displayUrl = signed.presignedUrl;
-        isSignedUrl = true;
-      }
-
       return {
         id: blob.pathname,
         pathname: blob.pathname,
         category,
         name: getDisplayName(blob.pathname),
-        url: displayUrl,
+        url: "/api/assets/image?pathname=" + encodeURIComponent(blob.pathname),
+        originalUrl: blob.url,
         isPublicUrl: accessMode === "public",
         accessMode,
-        isSignedUrl,
-        signedUrlExpiresAt: isSignedUrl ? validUntil : null,
         size: blob.size,
         uploadedAt: blob.uploadedAt,
       };
-    }));
+    }).filter(Boolean);
 
     assets.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
 
