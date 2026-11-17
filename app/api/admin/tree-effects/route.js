@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    const result = await get("settings/tree-effects.json", { access: "public" });
+    const result = await get("settings/tree-effects.json", { access: "private" });
     if (!result || result.statusCode !== 200 || !result.stream) return NextResponse.json({ assignments: {} });
     const assignments = await new Response(result.stream).json();
     return NextResponse.json({ assignments: assignments && typeof assignments === "object" && !Array.isArray(assignments) ? assignments : {} });
@@ -31,7 +31,7 @@ export async function PUT(request) {
       clean[treeId] = [...new Set(effectIds)];
     }
     await put("settings/tree-effects.json", JSON.stringify(clean), {
-      access: "public",
+      access: "private",
       addRandomSuffix: false,
       allowOverwrite: true,
       contentType: "application/json",
