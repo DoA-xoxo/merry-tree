@@ -4,7 +4,7 @@ import { isAdminRequest } from "../../../../lib/admin-auth";
 
 export const runtime = "nodejs";
 
-const CATEGORIES = ["tree", "background", "ornament", "effect"];
+const CATEGORIES = ["tree", "topper", "background", "ornament", "effect"];
 
 export async function POST(request) {
   if (!isAdminRequest(request)) {
