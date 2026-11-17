@@ -61,6 +61,7 @@ function TreeCanvas({ svgRef, background, tree, topper, effects, ornaments, sele
       ref={svgRef}
       className="tree-scene"
       viewBox="0 0 900 1000"
+      style={{ touchAction: "none", userSelect: "none" }}
       xmlns="http://www.w3.org/2000/svg"
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
@@ -204,26 +205,25 @@ export default function Home() {
     setSelectedId(id);
   };
 
-  const getPoint = (event) => {
-    const rect = svgRef.current.getBoundingClientRect();
-    return {
-      x: ((event.clientX - rect.left) / rect.width) * 900,
-      y: ((event.clientY - rect.top) / rect.height) * 1000,
-    };
-  };
+  const getPoint = (event, rect = svgRef.current.getBoundingClientRect()) => ({
+    x: ((event.clientX - rect.left) / rect.width) * 900,
+    y: ((event.clientY - rect.top) / rect.height) * 1000,
+  });
 
   const onPointerDown = (event, id) => {
     event.preventDefault();
     event.stopPropagation();
     const item = ornaments.find((ornament) => ornament.id === id);
     if (!item) return;
-    const point = getPoint(event);
+    const rect = svgRef.current.getBoundingClientRect();
+    const point = getPoint(event, rect);
     dragRef.current = {
       id,
       dx: point.x - item.x,
       dy: point.y - item.y,
       x: item.x,
       y: item.y,
+      rect,
       element: event.currentTarget,
     };
     setSelectedId(id);
@@ -233,7 +233,8 @@ export default function Home() {
   const onPointerMove = (event) => {
     const drag = dragRef.current;
     if (!drag) return;
-    const point = getPoint(event);
+    event.preventDefault();
+    const point = getPoint(event, drag.rect);
     const x = Math.max(45, Math.min(855, point.x - drag.dx));
     const y = Math.max(45, Math.min(955, point.y - drag.dy));
     drag.x = x;
