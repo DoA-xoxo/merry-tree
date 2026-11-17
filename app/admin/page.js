@@ -18,9 +18,15 @@ function formatSize(size) {
   return size >= 1024 * 1024 ? (size / 1024 / 1024).toFixed(1) + " MB" : Math.max(1, Math.round(size / 1024)) + " KB";
 }
 
-function safeFileName(name) {
-  const normalized = name.normalize("NFKD").toLowerCase().replace(/[^a-z0-9._-]+/g, "_").replace(/_+/g, "_");
-  return normalized.endsWith(".png") ? normalized : normalized + ".png";
+function encodeOptionName(name) {
+  const bytes = new TextEncoder().encode(name.trim());
+  let binary = "";
+  bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function fileNameWithoutExtension(name) {
+  return name.replace(/\.png$/i, "");
 }
 
 function AdminAssetPreview({ asset }) {
@@ -50,6 +56,7 @@ export default function AdminPage() {
   const [error, setError] = useState("");
   const [busyCategory, setBusyCategory] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [pendingUpload, setPendingUpload] = useState(null);
   const fileInputs = useRef({});
 
   const totalByCategory = useMemo(() => {
@@ -111,11 +118,58 @@ export default function AdminPage() {
     setMessage("로그아웃했어요.");
   };
 
-  const handleUpload = async (event, category) => {
+  const prepareUpload = (event, category) => {
     const files = Array.from(event.target.files || []);
     event.target.value = "";
     if (!files.length) return;
 
+    const validFiles = [];
+    const failures = [];
+    files.forEach((file, index) => {
+      if (file.type !== "image/png" && !file.name.toLowerCase().endsWith(".png")) {
+        failures.push(file.name + ": PNG 파일만 업로드할 수 있어요.");
+      } else if (file.size > MAX_FILE_SIZE) {
+        failures.push(file.name + ": 파일은 15MB 이하로 올려 주세요.");
+      } else {
+        validFiles.push({
+          id: String(Date.now()) + "-" + index + "-" + Math.random().toString(16).slice(2),
+          file,
+          name: fileNameWithoutExtension(file.name).slice(0, 40),
+        });
+      }
+    });
+
+    setError(failures.join(" "));
+    setMessage("");
+    if (validFiles.length) setPendingUpload({ category, files: validFiles });
+  };
+
+  const updatePendingName = (id, name) => {
+    setPendingUpload((current) => current ? ({
+      ...current,
+      files: current.files.map((item) => item.id === id ? { ...item, name: name.slice(0, 40) } : item),
+    }) : current);
+  };
+
+  const removePendingFile = (id) => {
+    setPendingUpload((current) => {
+      if (!current) return current;
+      const files = current.files.filter((item) => item.id !== id);
+      return files.length ? { ...current, files } : null;
+    });
+  };
+
+  const cancelPendingUpload = () => setPendingUpload(null);
+
+  const confirmUpload = async () => {
+    if (!pendingUpload || !pendingUpload.files.length) return;
+    if (pendingUpload.files.some((item) => !item.name.trim())) {
+      setError("모든 이미지의 옵션 이름을 입력해 주세요.");
+      return;
+    }
+
+    const category = pendingUpload.category;
+    const files = pendingUpload.files;
     setBusyCategory(category);
     setUploadProgress(0);
     setError("");
@@ -123,22 +177,15 @@ export default function AdminPage() {
 
     let completed = 0;
     const failures = [];
+    const remaining = [];
 
-    for (const file of files) {
-      if (file.type !== "image/png" && !file.name.toLowerCase().endsWith(".png")) {
-        failures.push(file.name + ": PNG 파일만 업로드할 수 있어요.");
-        continue;
-      }
-      if (file.size > MAX_FILE_SIZE) {
-        failures.push(file.name + ": 파일은 15MB 이하로 올려 주세요.");
-        continue;
-      }
-
+    for (const item of files) {
+      const { file, name } = item;
       try {
         const uniqueName = (typeof crypto !== "undefined" && crypto.randomUUID)
           ? crypto.randomUUID()
           : String(Date.now()) + Math.random().toString(16).slice(2);
-        const pathname = "assets/" + category + "/" + uniqueName + "__" + safeFileName(file.name);
+        const pathname = "assets/" + category + "/" + uniqueName + "__" + encodeOptionName(name) + ".png";
         await uploadPresigned(pathname, file, {
           access: "public",
           contentType: "image/png",
@@ -152,7 +199,8 @@ export default function AdminPage() {
         completed += 1;
         setUploadProgress(Math.round((completed / files.length) * 100));
       } catch (uploadError) {
-        failures.push(file.name + ": " + (uploadError.message || "업로드 실패"));
+        failures.push(name + ": " + (uploadError.message || "업로드 실패"));
+        remaining.push(item);
       }
     }
 
@@ -161,7 +209,8 @@ export default function AdminPage() {
 
     setBusyCategory("");
     setUploadProgress(0);
-    if (completed) setMessage(completed + "개의 PNG 이미지를 저장했어요. 메인 화면에도 반영됐어요.");
+    setPendingUpload(remaining.length ? { category, files: remaining } : null);
+    if (completed) setMessage(completed + "개의 PNG 이미지와 옵션 이름을 저장했어요. 메인 화면에도 반영됐어요.");
     if (failures.length) setError(failures.join(" "));
   };
 
@@ -242,14 +291,14 @@ export default function AdminPage() {
               <section className="admin-category" key={category.id}>
                 <div className="admin-category-heading">
                   <div><span>{category.english}</span><h3>{category.title}</h3><p>{category.note}</p></div>
-                  <label className={"admin-upload-button " + (busyCategory === category.id ? "disabled" : "")}>
+                  <label className={"admin-upload-button " + (busyCategory === category.id || pendingUpload ? "disabled" : "")}>
                     <input
                       ref={(node) => { fileInputs.current[category.id] = node; }}
                       type="file"
                       accept="image/png,.png"
                       multiple
-                      disabled={Boolean(busyCategory)}
-                      onChange={(event) => handleUpload(event, category.id)}
+                      disabled={Boolean(busyCategory) || Boolean(pendingUpload)}
+                      onChange={(event) => prepareUpload(event, category.id)}
                     />
                     <b>＋</b> PNG 추가
                   </label>
@@ -257,6 +306,42 @@ export default function AdminPage() {
 
                 {busyCategory === category.id ? (
                   <div className="upload-progress"><span>이미지를 저장하고 있어요 · {uploadProgress}%</span><i><b style={{ width: uploadProgress + "%" }} /></i></div>
+                ) : null}
+
+                {pendingUpload?.category === category.id ? (
+                  <div className="pending-upload-panel">
+                    <div className="pending-upload-heading">
+                      <div><strong>옵션 이름 정하기</strong><small>메인 화면의 이미지 선택창에 표시될 이름이에요.</small></div>
+                      <button type="button" onClick={cancelPendingUpload}>취소</button>
+                    </div>
+                    <div className="pending-upload-list">
+                      {pendingUpload.files.map((item) => (
+                        <div className="pending-upload-row" key={item.id}>
+                          <div className="pending-file-info">
+                            <span className="pending-file-icon">PNG</span>
+                            <div><strong title={item.file.name}>{item.file.name}</strong><small>{formatSize(item.file.size)}</small></div>
+                          </div>
+                          <label className="pending-name-field">
+                            <span>옵션 이름</span>
+                            <input
+                              type="text"
+                              value={item.name}
+                              maxLength={40}
+                              placeholder="예: 빨간 리본"
+                              onChange={(event) => updatePendingName(item.id, event.target.value)}
+                            />
+                          </label>
+                          <button type="button" className="pending-remove-button" onClick={() => removePendingFile(item.id)} aria-label="업로드 목록에서 제거">×</button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="pending-upload-footer">
+                      <small>{pendingUpload.files.length}개 선택 · 이름은 최대 40자</small>
+                      <button type="button" className="pending-confirm-button" onClick={confirmUpload} disabled={Boolean(busyCategory)}>
+                        이름 저장하고 {pendingUpload.files.length}개 업로드
+                      </button>
+                    </div>
+                  </div>
                 ) : null}
 
                 {categoryAssets.length ? (
@@ -275,7 +360,7 @@ export default function AdminPage() {
               </section>
             );
           })}
-          <div className="admin-footer-note">PNG · 파일당 최대 15MB · 업로드한 파일은 Vercel Blob에 영구 보관됩니다.</div>
+          <div className="admin-footer-note">PNG · 파일당 최대 15MB · 옵션 이름 최대 40자 · 업로드한 파일은 Vercel Blob에 영구 보관됩니다.</div>
         </section>
       )}
 
