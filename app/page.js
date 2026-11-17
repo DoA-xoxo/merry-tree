@@ -34,7 +34,7 @@ async function createPngBlob(svgElement) {
     image.src = objectUrl;
     await new Promise((resolve, reject) => {
       image.onload = resolve;
-      image.onerror = () => reject(new Error("이미지를 불러오지 못했어요. PNG 주소의 공개 권한을 확인해 주세요."));
+      image.onerror = () => reject(new Error("꾸미기 이미지를 합성하지 못했어요. 이미지 로딩 오류가 있는지 확인하고 다시 시도해 주세요."));
     });
 
     const canvas = document.createElement("canvas");
@@ -94,7 +94,6 @@ function TreeCanvas({ svgRef, background, tree, topper, effects, ornaments, sele
         >
           <image
             href={item.url}
-            crossOrigin="anonymous"
             x={-item.size / 2}
             y={-item.size / 2}
             width={item.size}
