@@ -65,9 +65,6 @@ export async function GET() {
         category,
         name: getDisplayName(blob.pathname),
         url: "/api/assets/image?pathname=" + encodeURIComponent(blob.pathname) + "&access=" + accessMode,
-        originalUrl: blob.url,
-        isPublicUrl: accessMode === "public",
-        accessMode,
         size: blob.size,
         uploadedAt: blob.uploadedAt,
       };
