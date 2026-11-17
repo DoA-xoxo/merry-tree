@@ -25,33 +25,30 @@ export async function GET(request) {
   }
 
   try {
-    const access = process.env.BLOB_STORE_ID ? undefined : "public";
-    let result;
+    let result = null;
+    try {
+      result = await get(pathname, { access: "public" });
+    } catch {}
 
-    if (access) {
-      result = await get(pathname, { access });
-    } else {
-      try {
-        result = await get(pathname, { access: "public" });
-      } catch {
-        result = await get(pathname, { access: "private" });
-      }
+    if (!result) {
+      result = await get(pathname, { access: "private" });
     }
 
     if (!result || result.statusCode !== 200 || !result.stream) {
       return new Response("Image not found", { status: 404 });
     }
 
-    return new Response(result.stream, {
-      status: 200,
-      headers: {
-        "Content-Type": result.blob.contentType || "image/png",
-        "Content-Length": String(result.blob.size || ""),
-        "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
-        "X-Content-Type-Options": "nosniff",
-        "ETag": result.blob.etag,
-      },
+    const headers = new Headers({
+      "Content-Type": result.blob.contentType || "image/png",
+      "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
+      "X-Content-Type-Options": "nosniff",
+      "ETag": result.blob.etag,
     });
+    if (typeof result.blob.size === "number") {
+      headers.set("Content-Length", String(result.blob.size));
+    }
+
+    return new Response(result.stream, { status: 200, headers });
   } catch (error) {
     return new Response(
       "Unable to load image: " + (error.message || "Blob request failed"),
