@@ -77,13 +77,13 @@ function TreeCanvas({ svgRef, background, tree, topper, effects, ornaments, sele
         </g>
       )}
       {tree ? (
-        <image href={tree.url} crossOrigin="anonymous" x="55" y="45" width="790" height="900" preserveAspectRatio="xMidYMid meet" onError={() => onImageError(tree)} />
+        <image href={tree.url} x="55" y="57" width="790" height="900" preserveAspectRatio="xMidYMid meet" onError={() => onImageError(tree)} />
       ) : null}
       {effects.map((item) => (
-        <image key={item.id} href={item.url} crossOrigin="anonymous" x="55" y="45" width="790" height="900" preserveAspectRatio="xMidYMid meet" pointerEvents="none" onError={() => onImageError(item)} />
+        <image key={item.id} href={item.url} x="55" y="57" width="790" height="900" preserveAspectRatio="xMidYMid meet" pointerEvents="none" onError={() => onImageError(item)} />
       ))}
       {tree && topper ? (
-        <image href={topper.url} crossOrigin="anonymous" x="365" y="8" width="170" height="170" preserveAspectRatio="xMidYMid meet" pointerEvents="none" onError={() => onImageError(topper)} />
+        <image href={topper.url} x="365" y="20" width="170" height="170" preserveAspectRatio="xMidYMid meet" pointerEvents="none" onError={() => onImageError(topper)} />
       ) : null}
       {ornaments.map((item) => (
         <g
@@ -177,8 +177,6 @@ export default function Home() {
       ? current
       : current.concat({ id: item.id, name: item.name, url: item.url, isPublicUrl: item.isPublicUrl }));
   };
-
-  const hasUnknownAssetUrl = assets.some((item) => item.accessMode === "unknown");
 
   const addOrnament = (asset) => {
     const index = ornaments.length;
@@ -353,7 +351,6 @@ export default function Home() {
           <div className="panel-header"><div><span className="section-eyebrow">LET'S DECORATE</span><h2>꾸미기 도구</h2></div><button className="reset-button" type="button" onClick={clearOrnaments}>장식 비우기 ↺</button></div>
 
           {assetError ? <div className="notice warning">{assetError}<a href="/admin">관리자 설정 확인 ↗</a></div> : null}
-          {hasPrivateAssetUrl ? <div className="notice warning">일부 이미지의 Blob 접근 방식을 확인할 수 없어요. 저장소 연결을 확인해 주세요. <a href="/admin">관리자 페이지에서 원본 주소 확인 ↗</a></div> : null}
           {imageErrorDetails.length ? (
             <div className="notice warning">
               {imageErrorDetails.length}개 이미지가 브라우저에서 열리지 않아요. 원본 이미지 링크를 열어 403 또는 404 오류인지 확인해 주세요.
