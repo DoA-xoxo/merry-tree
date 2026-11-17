@@ -414,6 +414,7 @@ export default function Home() {
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
               />
+              <button className="scene-delete-button" type="button" onClick={removeSelected} disabled={!selectedId}>선택 삭제 −</button>
               {!selectedTree ? (
                 <div className="scene-empty">
                   <span>✦</span>
@@ -486,7 +487,7 @@ export default function Home() {
                 ))}
               </div>
             ) : <p className="empty-copy">관리자 페이지에서 오너먼트 PNG를 등록해 주세요.</p>}
-            <div className="selected-tools"><span>{selectedId ? "오너먼트가 선택되었어요." : "트리 위 장식을 선택해 보세요."}</span><button type="button" onClick={removeSelected} disabled={!selectedId}>선택 삭제 −</button></div>
+            <div className="selected-tools"><span>{selectedId ? "오너먼트가 선택되었어요." : "트리 위 장식을 선택해 보세요."}</span></div>
           </section>
 
           <section className="tool-section effect-section">
