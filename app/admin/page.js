@@ -23,11 +23,28 @@ function safeFileName(name) {
   return normalized.endsWith(".png") ? normalized : normalized + ".png";
 }
 
+function AdminAssetPreview({ asset }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <div className={"admin-asset-preview category-" + asset.category}>
+      {failed ? (
+        <div className="admin-image-error">
+          <strong>이미지를 불러오지 못했어요.</strong>
+          <a href={asset.url} target="_blank" rel="noreferrer">원본 이미지 열기 ↗</a>
+        </div>
+      ) : (
+        <img src={asset.url} alt={asset.name} onError={() => setFailed(true)} />
+      )}
+    </div>
+  );
+}
+
 export default function AdminPage() {
   const [checking, setChecking] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [assets, setAssets] = useState([]);
+  const hasPrivateAssetUrl = assets.some((asset) => asset.isPublicUrl === false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [busyCategory, setBusyCategory] = useState("");
@@ -211,6 +228,12 @@ export default function AdminPage() {
             <strong>기본 이미지 적용 방식</strong>
             <span>각 분류에서 가장 최근에 올린 이미지가 메인 화면에서 첫 번째로 선택돼요. 여러 장을 등록하면 방문자가 원하는 이미지를 직접 선택할 수 있어요.</span>
           </div>
+          {hasPrivateAssetUrl ? (
+            <div className="admin-notice admin-notice-warning">
+              <strong>주의: Blob 저장소가 Private으로 감지됐어요.</strong>
+              <span>메인 사이트에서 PNG를 직접 표시하려면 Blob Store의 Access를 Public으로 설정해야 해요. 아래 원본 이미지 열기를 눌러 실제 주소의 접근 상태도 확인해 주세요.</span>
+            </div>
+          ) : null}
 
           {CATEGORIES.map((category) => {
             const categoryAssets = assets.filter((asset) => asset.category === category.id);
@@ -239,7 +262,7 @@ export default function AdminPage() {
                   <div className="admin-asset-grid">
                     {categoryAssets.map((asset) => (
                       <article className="admin-asset-card" key={asset.id}>
-                        <div className={"admin-asset-preview category-" + category.id}><img src={asset.url} alt={asset.name} /></div>
+                        <AdminAssetPreview asset={asset} />
                         <div className="admin-asset-meta"><strong title={asset.name}>{asset.name}</strong><small>{formatSize(asset.size)}</small></div>
                         <button type="button" className="admin-delete-button" onClick={() => deleteAsset(asset)}>삭제</button>
                       </article>
