@@ -72,12 +72,12 @@ function TreeCanvas({ svgRef, background, tree, topper, effects, ornaments, sele
       {tree ? (
         <image href={tree.url} crossOrigin="anonymous" x="55" y="45" width="790" height="900" preserveAspectRatio="xMidYMid meet" />
       ) : null}
-      {topper ? (
-        <image href={topper.url} crossOrigin="anonymous" x="365" y="8" width="170" height="170" preserveAspectRatio="xMidYMid meet" pointerEvents="none" />
-      ) : null}
       {effects.map((item) => (
         <image key={item.id} href={item.url} crossOrigin="anonymous" x="55" y="45" width="790" height="900" preserveAspectRatio="xMidYMid meet" pointerEvents="none" />
       ))}
+      {tree && topper ? (
+        <image href={topper.url} crossOrigin="anonymous" x="365" y="8" width="170" height="170" preserveAspectRatio="xMidYMid meet" pointerEvents="none" />
+      ) : null}
       {ornaments.map((item) => (
         <g
           key={item.id}
