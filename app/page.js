@@ -133,7 +133,7 @@ export default function Home() {
   const [backgroundId, setBackgroundId] = useState("");
   const [ornaments, setOrnaments] = useState([]);
   const [treeEffectAssignments, setTreeEffectAssignments] = useState({});
-  const [sparklesEnabled, setSparklesEnabled] = useState(true);
+  const [disabledSparkleIds, setDisabledSparkleIds] = useState([]);
   const [selectedId, setSelectedId] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -152,7 +152,13 @@ export default function Home() {
   const selectedBackground = backgrounds.find((item) => item.id === backgroundId) || backgrounds[0] || null;
   const assignedEffectIds = selectedTree ? (treeEffectAssignments[selectedTree.id] || []) : [];
   const appliedEffects = effectAssets.filter((item) => assignedEffectIds.includes(item.id));
-  const visibleEffects = sparklesEnabled ? appliedEffects : [];
+  const visibleEffects = appliedEffects.filter((item) => !disabledSparkleIds.includes(item.id));
+
+  const toggleSparkle = (id) => {
+    setDisabledSparkleIds((current) => current.includes(id)
+      ? current.filter((itemId) => itemId !== id)
+      : current.concat(id));
+  };
 
   const refreshAssets = async () => {
     setLoadingAssets(true);
@@ -423,17 +429,20 @@ export default function Home() {
           </section>
 
           <section className="tool-section effect-section">
-            <div className="tool-title-row"><h3><span className="tool-number">05</span> 반짝임 더하기</h3><button className={"sparkle-toggle " + (sparklesEnabled ? "active" : "")} type="button" onClick={() => setSparklesEnabled((value) => !value)} aria-pressed={sparklesEnabled}>{sparklesEnabled ? "반짝임 켜짐" : "반짝임 꺼짐"}</button></div>
-            <p className="tool-description">선택한 트리에 맞춰 관리자가 지정한 반짝임이 자동으로 적용돼요.</p>
+            <div className="tool-title-row"><h3><span className="tool-number">05</span> 반짝임 더하기</h3><span className="tool-caption">SPARKLE PNG</span></div>
+            <p className="tool-description">반짝임을 하나씩 눌러 개별적으로 켜거나 끌 수 있어요.</p>
             {appliedEffects.length ? (
               <div className="effect-picker-list">
-                {appliedEffects.map((item) => (
-                  <div key={item.id} className="effect-choice active">
-                    <span className="effect-choice-thumb"><img src={item.url} alt="" onError={() => handleAssetImageError(item)} /></span>
-                    <span className="effect-choice-name">{item.name}</span>
-                    <span className="effect-choice-check">{sparklesEnabled ? "✓ 적용 중" : "꺼짐"}</span>
-                  </div>
-                ))}
+                {appliedEffects.map((item) => {
+                  const enabled = !disabledSparkleIds.includes(item.id);
+                  return (
+                    <button key={item.id} type="button" className={"effect-choice " + (enabled ? "active" : "")} onClick={() => toggleSparkle(item.id)} aria-pressed={enabled}>
+                      <span className="effect-choice-thumb"><img src={item.url} alt="" onError={() => handleAssetImageError(item)} /></span>
+                      <span className="effect-choice-name">{item.name}</span>
+                      <span className="effect-choice-check">{enabled ? "✓ 켜짐" : "꺼짐"}</span>
+                    </button>
+                  );
+                })}
               </div>
             ) : <p className="empty-copy">{selectedTree ? "이 트리에 연결된 반짝임이 아직 없어요." : "트리를 선택하면 연결된 반짝임이 적용돼요."} 관리자 페이지에서 트리별로 지정할 수 있어요.</p>}
           </section>
