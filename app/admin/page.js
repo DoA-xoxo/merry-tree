@@ -37,7 +37,6 @@ function AdminAssetPreview({ asset }) {
         <div className="admin-image-error">
           <strong>이미지를 불러오지 못했어요.</strong>
           <a href={asset.url} target="_blank" rel="noreferrer">사이트 이미지 주소 열기 ↗</a>
-          {asset.originalUrl ? <a href={asset.originalUrl} target="_blank" rel="noreferrer">Blob 원본 주소 열기 ↗</a> : null}
         </div>
       ) : (
         <img src={asset.url} alt={asset.name} onError={() => setFailed(true)} />
@@ -51,7 +50,6 @@ export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [assets, setAssets] = useState([]);
-  const hasUnknownAssetUrl = assets.some((asset) => asset.accessMode === "unknown");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [busyCategory, setBusyCategory] = useState("");
@@ -278,12 +276,6 @@ export default function AdminPage() {
             <strong>기본 이미지 적용 방식</strong>
             <span>각 분류에서 가장 최근에 올린 이미지가 메인 화면에서 첫 번째로 선택돼요. 여러 장을 등록하면 방문자가 원하는 이미지를 직접 선택할 수 있어요.</span>
           </div>
-          {hasPrivateAssetUrl ? (
-            <div className="admin-notice admin-notice-warning">
-              <strong>주의: 일부 Blob 이미지 주소 형식을 확인할 수 없어요.</strong>
-              <span>저장소 연결을 확인해 주세요. 아래 원본 이미지 열기를 눌러 실제 주소의 응답 상태도 확인할 수 있어요.</span>
-            </div>
-          ) : null}
 
           {CATEGORIES.map((category) => {
             const categoryAssets = assets.filter((asset) => asset.category === category.id);
