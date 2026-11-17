@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { upload } from "@vercel/blob/client";
+import { uploadPresigned } from "@vercel/blob/client";
 
 const CATEGORIES = [
   { id: "tree", title: "트리 PNG", english: "TREE ASSETS", note: "메인 화면에서 사용할 트리 이미지" },
@@ -121,7 +121,7 @@ export default function AdminPage() {
           ? crypto.randomUUID()
           : String(Date.now()) + Math.random().toString(16).slice(2);
         const pathname = "assets/" + category + "/" + uniqueName + "__" + safeFileName(file.name);
-        await upload(pathname, file, {
+        await uploadPresigned(pathname, file, {
           access: "public",
           contentType: "image/png",
           handleUploadUrl: "/api/admin/upload",
