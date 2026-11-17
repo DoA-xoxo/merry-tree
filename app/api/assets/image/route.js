@@ -19,6 +19,7 @@ function isAllowedPathname(pathname) {
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const pathname = searchParams.get("pathname");
+  const requestedAccess = searchParams.get("access");
 
   if (!isAllowedPathname(pathname)) {
     return new Response("Invalid image path", { status: 400 });
@@ -26,12 +27,12 @@ export async function GET(request) {
 
   try {
     let result = null;
-    try {
-      result = await get(pathname, { access: "public" });
-    } catch {}
 
-    if (!result) {
-      result = await get(pathname, { access: "private" });
+    if (requestedAccess === "public" || requestedAccess === "private") {
+      result = await get(pathname, { access: requestedAccess });
+    } else {
+      try { result = await get(pathname, { access: "public" }); } catch {}
+      if (!result) result = await get(pathname, { access: "private" });
     }
 
     if (!result || result.statusCode !== 200 || !result.stream) {
