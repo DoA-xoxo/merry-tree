@@ -21,20 +21,23 @@ export async function POST(request) {
       request,
       onBeforeGenerateToken: async (pathname, clientPayload) => {
         if (!isAdminRequest(request)) throw new Error("관리자 로그인이 필요해요.");
-        const match = pathname.match(/^assets\\/(tree|background|ornament|effect)\\/[A-Za-z0-9._-]+\\.png$/i);
-        if (!match || !CATEGORIES.includes(match[1])) {
-          throw new Error("허용되지 않은 이미지 경로예요.");
+        const parts = pathname.split("/");
+        const category = parts[1];
+        const fileName = parts[2] || "";
+        if (parts.length !== 3 || parts[0] !== "assets" || !CATEGORIES.includes(category) ||
+            !fileName.toLowerCase().endsWith(".png") || !/^[A-Za-z0-9._-]+$/.test(fileName)) {
+          throw new Error("허용되지 않은 PNG 경로예요.");
         }
         let payload;
         try { payload = JSON.parse(clientPayload || "{}"); } catch { payload = {}; }
-        if (payload.category !== match[1]) throw new Error("이미지 분류가 올바르지 않아요.");
+        if (payload.category !== category) throw new Error("이미지 분류가 올바르지 않아요.");
 
         return {
           allowedContentTypes: ["image/png"],
           maximumSizeInBytes: 15 * 1024 * 1024,
           cacheControlMaxAge: 60 * 60 * 24 * 365,
           addRandomSuffix: false,
-          tokenPayload: JSON.stringify({ category: match[1] }),
+          tokenPayload: JSON.stringify({ category }),
         };
       },
       onUploadCompleted: async () => {},
