@@ -132,7 +132,7 @@ export default function Home() {
   const [topperId, setTopperId] = useState("");
   const [backgroundId, setBackgroundId] = useState("");
   const [ornaments, setOrnaments] = useState([]);
-  const [activeEffects, setActiveEffects] = useState([]);
+  const [treeEffectAssignments, setTreeEffectAssignments] = useState({});
   const [selectedId, setSelectedId] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -149,7 +149,8 @@ export default function Home() {
   const selectedTree = trees.find((item) => item.id === treeId) || trees[0] || null;
   const selectedTopper = topperId === "__none__" ? null : (toppers.find((item) => item.id === topperId) || toppers[0] || null);
   const selectedBackground = backgrounds.find((item) => item.id === backgroundId) || backgrounds[0] || null;
-  const appliedEffects = effectAssets.filter((item) => activeEffects.includes(item.id));
+  const assignedEffectIds = selectedTree ? (treeEffectAssignments[selectedTree.id] || []) : [];
+  const appliedEffects = effectAssets.filter((item) => assignedEffectIds.includes(item.id));
 
   const refreshAssets = async () => {
     setLoadingAssets(true);
@@ -158,6 +159,7 @@ export default function Home() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "이미지 목록을 불러오지 못했어요.");
       setAssets(data.assets || []);
+      setTreeEffectAssignments(data.treeEffectAssignments || {});
       setImageErrorDetails([]);
       setAssetError("");
     } catch (error) {
@@ -293,9 +295,6 @@ export default function Home() {
     }
   };
 
-  const toggleEffect = (id) => {
-    setActiveEffects((current) => current.includes(id) ? current.filter((value) => value !== id) : current.concat(id));
-  };
 
   return (
     <main className="app-shell">
@@ -409,18 +408,18 @@ export default function Home() {
 
           <section className="tool-section effect-section">
             <div className="tool-title-row"><h3><span className="tool-number">05</span> 반짝임 더하기</h3><span className="tool-caption">SPARKLE PNG</span></div>
-            <p className="tool-description">선택한 반짝임은 트리에 고정되어 적용돼요.</p>
-            {effectAssets.length ? (
+            <p className="tool-description">선택한 트리에 맞춰 관리자가 지정한 반짝임이 자동으로 적용돼요.</p>
+            {appliedEffects.length ? (
               <div className="effect-picker-list">
-                {effectAssets.map((item) => (
-                  <button key={item.id} type="button" className={"effect-choice " + (activeEffects.includes(item.id) ? "active" : "")} onClick={() => toggleEffect(item.id)}>
+                {appliedEffects.map((item) => (
+                  <div key={item.id} className="effect-choice active">
                     <span className="effect-choice-thumb"><img src={item.url} alt="" onError={() => handleAssetImageError(item)} /></span>
                     <span className="effect-choice-name">{item.name}</span>
-                    <span className="effect-choice-check">{activeEffects.includes(item.id) ? "✓ 적용 중" : "적용하기 +"}</span>
-                  </button>
+                    <span className="effect-choice-check">✓ 자동 적용</span>
+                  </div>
                 ))}
               </div>
-            ) : <p className="empty-copy">관리자 페이지에서 반짝임 PNG를 등록해 주세요.</p>}
+            ) : <p className="empty-copy">{selectedTree ? "이 트리에 연결된 반짝임이 아직 없어요." : "트리를 선택하면 연결된 반짝임이 적용돼요."} 관리자 페이지에서 트리별로 지정할 수 있어요.</p>}
           </section>
 
           <div className="export-section">
