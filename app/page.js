@@ -210,24 +210,38 @@ export default function Home() {
     const item = ornaments.find((ornament) => ornament.id === id);
     if (!item) return;
     const point = getPoint(event);
-    dragRef.current = { id, dx: point.x - item.x, dy: point.y - item.y };
+    dragRef.current = {
+      id,
+      dx: point.x - item.x,
+      dy: point.y - item.y,
+      x: item.x,
+      y: item.y,
+      element: event.currentTarget,
+    };
     setSelectedId(id);
     if (svgRef.current?.setPointerCapture) svgRef.current.setPointerCapture(event.pointerId);
   };
 
   const onPointerMove = (event) => {
-    if (!dragRef.current) return;
-    const point = getPoint(event);
     const drag = dragRef.current;
-    setOrnaments((current) => current.map((item) => item.id === drag.id ? {
-      ...item,
-      x: Math.max(45, Math.min(855, point.x - drag.dx)),
-      y: Math.max(45, Math.min(955, point.y - drag.dy)),
-    } : item));
+    if (!drag) return;
+    const point = getPoint(event);
+    const x = Math.max(45, Math.min(855, point.x - drag.dx));
+    const y = Math.max(45, Math.min(955, point.y - drag.dy));
+    drag.x = x;
+    drag.y = y;
+    // 드래그 중 React 전체 렌더링을 피하고 SVG 요소만 즉시 이동해요.
+    if (drag.element) drag.element.setAttribute("transform", "translate(" + x + " " + y + ")");
   };
 
   const onPointerUp = () => {
+    const drag = dragRef.current;
+    if (!drag) return;
     dragRef.current = null;
+    // 최종 위치만 상태에 반영해 다음 렌더링에도 위치를 유지해요.
+    setOrnaments((current) => current.map((item) => item.id === drag.id
+      ? { ...item, x: drag.x, y: drag.y }
+      : item));
   };
 
   const removeSelected = () => {
