@@ -5,6 +5,7 @@ import { upload } from "@vercel/blob/client";
 
 const CATEGORIES = [
   { id: "tree", title: "트리 PNG", english: "TREE ASSETS", note: "메인 화면에서 사용할 트리 이미지" },
+  { id: "topper", title: "트리 꼭대기 장식 PNG", english: "TREE TOPPER ASSETS", note: "트리 맨 위에 고정해서 붙일 별, 리본 등의 장식 이미지" },
   { id: "background", title: "배경 PNG", english: "BACKGROUND ASSETS", note: "트리 뒤에 표시할 배경 이미지" },
   { id: "ornament", title: "오너먼트 PNG", english: "ORNAMENT ASSETS", note: "방문자가 트리에 자유롭게 달 수 있는 스티커" },
   { id: "effect", title: "반짝임 PNG", english: "SPARKLE ASSETS", note: "트리에 고정해서 겹쳐 적용할 장식 이미지" },
