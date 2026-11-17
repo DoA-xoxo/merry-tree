@@ -382,7 +382,7 @@ export default function Home() {
   return (
     <main className="app-shell">
       <header className="site-header">
-        <a className="brand-mark" href="/" aria-label="MERRY TREE-MAS"><img className="brand-wordmark" src="/merry-tree-mas.png" alt="MERRY TREE-MAS" /></a>
+        <a className="brand-mark" href="/">MERRY TREE-MAS</a>
         <a className="admin-shortcut" href="/admin">ADMINISTRATOR ↗</a>
       </header>
 
