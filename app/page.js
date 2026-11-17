@@ -70,13 +70,13 @@ function TreeCanvas({ svgRef, background, tree, topper, effects, ornaments, sele
         </g>
       )}
       {tree ? (
-        <image href={tree.url} crossOrigin="anonymous" x="55" y="45" width="790" height="900" preserveAspectRatio="xMidYMid meet" />
+        <image href={tree.url} crossOrigin="anonymous" x="55" y="45" width="790" height="900" preserveAspectRatio="xMidYMid meet" onError={() => onImageError(tree)} />
       ) : null}
       {effects.map((item) => (
-        <image key={item.id} href={item.url} crossOrigin="anonymous" x="55" y="45" width="790" height="900" preserveAspectRatio="xMidYMid meet" pointerEvents="none" />
+        <image key={item.id} href={item.url} crossOrigin="anonymous" x="55" y="45" width="790" height="900" preserveAspectRatio="xMidYMid meet" pointerEvents="none" onError={() => onImageError(item)} />
       ))}
       {tree && topper ? (
-        <image href={topper.url} crossOrigin="anonymous" x="365" y="8" width="170" height="170" preserveAspectRatio="xMidYMid meet" pointerEvents="none" />
+        <image href={topper.url} crossOrigin="anonymous" x="365" y="8" width="170" height="170" preserveAspectRatio="xMidYMid meet" pointerEvents="none" onError={() => onImageError(topper)} />
       ) : null}
       {ornaments.map((item) => (
         <g
