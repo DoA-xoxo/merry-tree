@@ -44,7 +44,7 @@ export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [assets, setAssets] = useState([]);
-  const hasPrivateAssetUrl = assets.some((asset) => asset.isPublicUrl === false && asset.isSignedUrl !== true);
+  const hasUnknownAssetUrl = assets.some((asset) => asset.accessMode === "unknown");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [busyCategory, setBusyCategory] = useState("");
@@ -230,8 +230,8 @@ export default function AdminPage() {
           </div>
           {hasPrivateAssetUrl ? (
             <div className="admin-notice admin-notice-warning">
-              <strong>주의: Blob 이미지 주소 형식을 확인할 수 없어요.</strong>
-              <span>저장소 연결과 Access 설정을 확인해 주세요. 아래 원본 이미지 열기를 눌러 실제 주소의 응답 상태도 확인할 수 있어요.</span>
+              <strong>주의: 일부 Blob 이미지 주소 형식을 확인할 수 없어요.</strong>
+              <span>저장소 연결을 확인해 주세요. 아래 원본 이미지 열기를 눌러 실제 주소의 응답 상태도 확인할 수 있어요.</span>
             </div>
           ) : null}
 
