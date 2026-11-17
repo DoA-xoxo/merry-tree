@@ -37,12 +37,18 @@ export async function GET() {
       if (parts.length !== 3 || parts[0] !== "assets" || !CATEGORIES.includes(category) || !fileName.toLowerCase().endsWith(".png")) {
         return null;
       }
+      const isPublicUrl = typeof blob.url === "string" && (() => {
+        try { return new URL(blob.url).hostname.includes(".public.blob.vercel-storage.com"); }
+        catch { return false; }
+      })();
+
       return {
         id: blob.pathname,
         pathname: blob.pathname,
         category,
         name: getDisplayName(blob.pathname),
         url: blob.url,
+        isPublicUrl,
         size: blob.size,
         uploadedAt: blob.uploadedAt,
       };
