@@ -1,9 +1,10 @@
-import { list } from "@vercel/blob";
+import { issueSignedToken, list, presignUrl } from "@vercel/blob";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const CATEGORIES = ["tree", "topper", "background", "ornament", "effect"];
+const READ_URL_TTL_MS = 6 * 24 * 60 * 60 * 1000;
 
 function getDisplayName(pathname) {
   const fileName = pathname.split("/").pop() || "image.png";
@@ -13,8 +14,17 @@ function getDisplayName(pathname) {
   catch { return withoutExtension.replace(/[_-]+/g, " "); }
 }
 
+function getAccessMode(url) {
+  try {
+    const hostname = new URL(url).hostname;
+    if (hostname.includes(".private.blob.vercel-storage.com")) return "private";
+    if (hostname.includes(".public.blob.vercel-storage.com")) return "public";
+  } catch {}
+  return "unknown";
+}
+
 export async function GET() {
-  const hasOidcConnection = Boolean(process.env.VERCEL_OIDC_TOKEN && process.env.BLOB_STORE_ID);
+  const hasOidcConnection = Boolean(process.env.BLOB_STORE_ID);
   const hasReadWriteToken = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 
   if (!hasOidcConnection && !hasReadWriteToken) {
@@ -30,29 +40,60 @@ export async function GET() {
 
   try {
     const result = await list({ prefix: "assets/", limit: 1000 });
-    const assets = result.blobs.map((blob) => {
+    const validBlobs = result.blobs.filter((blob) => {
       const parts = blob.pathname.split("/");
       const category = parts[1];
       const fileName = parts[2] || "";
-      if (parts.length !== 3 || parts[0] !== "assets" || !CATEGORIES.includes(category) || !fileName.toLowerCase().endsWith(".png")) {
-        return null;
+      return parts.length === 3 &&
+        parts[0] === "assets" &&
+        CATEGORIES.includes(category) &&
+        fileName.toLowerCase().endsWith(".png");
+    });
+
+    const privateBlobs = validBlobs.filter((blob) => getAccessMode(blob.url) === "private");
+    const validUntil = Date.now() + READ_URL_TTL_MS;
+    const privateReadToken = privateBlobs.length
+      ? await issueSignedToken({
+          pathname: "*",
+          operations: ["get"],
+          validUntil,
+        })
+      : null;
+
+    const assets = await Promise.all(validBlobs.map(async (blob) => {
+      const parts = blob.pathname.split("/");
+      const category = parts[1];
+      const accessMode = getAccessMode(blob.url);
+      let displayUrl = blob.url;
+      let isSignedUrl = false;
+
+      if (accessMode === "private" && privateReadToken) {
+        const signed = await presignUrl(privateReadToken, {
+          operation: "get",
+          pathname: blob.pathname,
+          access: "private",
+          validUntil,
+        });
+        displayUrl = signed.presignedUrl;
+        isSignedUrl = true;
       }
-      const isPublicUrl = typeof blob.url === "string" && (() => {
-        try { return new URL(blob.url).hostname.includes(".public.blob.vercel-storage.com"); }
-        catch { return false; }
-      })();
 
       return {
         id: blob.pathname,
         pathname: blob.pathname,
         category,
         name: getDisplayName(blob.pathname),
-        url: blob.url,
-        isPublicUrl,
+        url: displayUrl,
+        isPublicUrl: accessMode === "public",
+        accessMode,
+        isSignedUrl,
+        signedUrlExpiresAt: isSignedUrl ? validUntil : null,
         size: blob.size,
         uploadedAt: blob.uploadedAt,
       };
-    }).filter(Boolean).sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+    }));
+
+    assets.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
 
     return Response.json(
       { assets, configured: true },
