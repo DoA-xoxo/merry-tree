@@ -25,19 +25,24 @@
 
 ### 1. Vercel Blob 연결
 
-1. Vercel 대시보드에서 이 프로젝트를 엽니다.
-2. **Storage** 탭에서 **Create Database → Blob**을 선택합니다.
-3. 새 Blob Store의 Access는 **Public**으로 설정합니다. 방문자의 브라우저가 이미지 주소로 PNG를 표시해야 합니다.
-4. Blob Store를 이 프로젝트에 연결합니다.
-5. 연결 옵션에서 **Add a read-write token env var**를 선택해 `BLOB_READ_WRITE_TOKEN`을 추가합니다. 브라우저 직접 업로드 토큰을 발급하는 데 필요합니다.
-6. Production 환경을 선택하고 저장합니다.
+1. Vercel 대시보드에서 `merry-tree` 프로젝트를 엽니다.
+2. **Storage** 탭에서 생성한 Blob Store를 선택합니다.
+3. Blob Store의 **Projects** 탭에서 `merry-tree` 프로젝트가 연결되어 있는지 확인합니다.
+4. 프로젝트의 연결 환경에 **Production**이 포함되어 있어야 합니다. Preview 배포에서도 사용하려면 Preview도 선택합니다.
+5. OIDC 기본 연결은 다음 변수를 자동으로 제공합니다.
+   - `BLOB_STORE_ID`
+   - `VERCEL_OIDC_TOKEN`
+   - `BLOB_WEBHOOK_PUBLIC_KEY`
+6. 이 프로젝트는 `handleUploadPresigned`를 사용하므로 OIDC 연결로 업로드할 수 있습니다. 별도의 `BLOB_READ_WRITE_TOKEN`은 필요하지 않습니다.
+
+프로젝트가 이미 연결되어 있다는 메시지가 나오면 중복 연결을 만들 필요가 없습니다. Blob Store의 **Projects** 탭에서 기존 `merry-tree` 연결 오른쪽의 메뉴(⋯) → **Update Project Connection**을 열고 Production 환경이 선택되어 있는지 확인한 다음 저장합니다.
 
 ### 2. 관리자 비밀번호 설정
 
 1. 프로젝트의 **Settings → Environment Variables**로 이동합니다.
 2. `ADMIN_PASSWORD` 변수를 추가합니다.
 3. 관리자 페이지에 사용할 강력한 비밀번호를 값으로 입력합니다.
-4. Production (필요하다면 Preview도)을 선택하고 저장합니다.
+4. Production을 선택하고 저장합니다. Preview 배포에서 관리자 기능도 테스트할 경우 Preview도 선택합니다.
 5. 변경 사항이 적용되도록 새 배포를 진행합니다.
 
 관리자 로그인은 `https://배포주소/admin`에서 할 수 있습니다. 로그인 세션은 12시간 후 만료됩니다. 비밀번호는 코드나 브라우저에 노출되지 않습니다.
@@ -49,11 +54,12 @@ npm install
 npm run dev
 ```
 
-로컬에서 이미지 저장 기능을 테스트하려면 Vercel Blob의 `BLOB_READ_WRITE_TOKEN`과 `ADMIN_PASSWORD`를 `.env.local`에 설정해야 합니다.
+로컬 개발에서는 Vercel OIDC 연결 변수가 자동으로 주입되지 않으므로 `vercel link` 후 `vercel env pull`로 Development 환경 변수를 가져와야 합니다.
 
 ## 기술 구성
 
 - Next.js 15.5.29
 - React 19.1.10
 - Vercel Blob 2.9.0
+- OIDC 기반 Blob 접근 및 Presigned PNG 업로드
 - 별도 방문자 회원가입, 포인트, 사용자 계정, 데이터베이스 불필요
