@@ -50,6 +50,8 @@ export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [assets, setAssets] = useState([]);
+  const [treeEffectAssignments, setTreeEffectAssignments] = useState({});
+  const [savingTreeEffects, setSavingTreeEffects] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [busyCategory, setBusyCategory] = useState("");
@@ -69,6 +71,9 @@ export default function AdminPage() {
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "이미지 목록을 불러오지 못했어요.");
     setAssets(data.assets || []);
+    const settingsResponse = await fetch("/api/admin/tree-effects", { cache: "no-store" });
+    const settingsData = await settingsResponse.json();
+    setTreeEffectAssignments(settingsData.assignments || {});
   };
 
   useEffect(() => {
@@ -212,6 +217,35 @@ export default function AdminPage() {
     if (failures.length) setError(failures.join(" "));
   };
 
+  const toggleTreeEffect = (treeId, effectId) => {
+    setTreeEffectAssignments((current) => {
+      const selected = current[treeId] || [];
+      const next = selected.includes(effectId) ? selected.filter((id) => id !== effectId) : selected.concat(effectId);
+      return { ...current, [treeId]: next };
+    });
+  };
+
+  const saveTreeEffects = async () => {
+    setSavingTreeEffects(true);
+    setError("");
+    setMessage("");
+    try {
+      const response = await fetch("/api/admin/tree-effects", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignments: treeEffectAssignments }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "트리별 반짝임 설정을 저장하지 못했어요.");
+      setTreeEffectAssignments(data.assignments || {});
+      setMessage("트리별 반짝임 연결을 저장했어요. 메인 화면에 자동 적용돼요.");
+    } catch (saveError) {
+      setError(saveError.message || "트리별 반짝임 설정을 저장하지 못했어요.");
+    } finally {
+      setSavingTreeEffects(false);
+    }
+  };
+
   const deleteAsset = async (asset) => {
     if (!window.confirm("‘" + asset.name + "’ 이미지를 영구 삭제할까요? 메인 선택창에서도 사라져요.")) return;
     setError("");
@@ -276,6 +310,35 @@ export default function AdminPage() {
             <strong>기본 이미지 적용 방식</strong>
             <span>각 분류에서 가장 최근에 올린 이미지가 메인 화면에서 첫 번째로 선택돼요. 여러 장을 등록하면 방문자가 원하는 이미지를 직접 선택할 수 있어요.</span>
           </div>
+
+          <section className="admin-category tree-effect-settings">
+            <div className="admin-category-heading">
+              <div><span>TREE & SPARKLE MATCHING</span><h3>트리별 반짝임 연결</h3><p>각 트리에 어울리는 반짝임을 여러 개 선택해 주세요. 방문자가 트리를 고르면 자동으로 적용돼요.</p></div>
+              <button type="button" className="pending-confirm-button" onClick={saveTreeEffects} disabled={savingTreeEffects}>{savingTreeEffects ? "저장 중..." : "연결 설정 저장"}</button>
+            </div>
+            {assets.filter((asset) => asset.category === "tree").length ? (
+              <div className="tree-effect-list">
+                {assets.filter((asset) => asset.category === "tree").map((tree) => {
+                  const effects = assets.filter((asset) => asset.category === "effect");
+                  const selected = treeEffectAssignments[tree.id] || [];
+                  return (
+                    <div className="tree-effect-row" key={tree.id}>
+                      <div className="tree-effect-name"><strong>{tree.name}</strong><small>{selected.length}개 반짝임 연결</small></div>
+                      {effects.length ? (
+                        <div className="tree-effect-options">
+                          {effects.map((effect) => (
+                            <button type="button" key={effect.id} className={"tree-effect-option " + (selected.includes(effect.id) ? "active" : "")} onClick={() => toggleTreeEffect(tree.id, effect.id)}>
+                              <span className="tree-effect-check">{selected.includes(effect.id) ? "✓" : "+"}</span>{effect.name}
+                            </button>
+                          ))}
+                        </div>
+                      ) : <small className="tree-effect-empty">먼저 반짝임 PNG를 등록해 주세요.</small>}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : <div className="admin-empty-assets">먼저 트리 PNG를 등록하면 트리별 반짝임을 연결할 수 있어요.</div>}
+          </section>
 
           {CATEGORIES.map((category) => {
             const categoryAssets = assets.filter((asset) => asset.category === category.id);
