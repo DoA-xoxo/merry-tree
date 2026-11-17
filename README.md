@@ -25,11 +25,11 @@
 ### 1. Vercel Blob 연결
 
 1. Vercel 대시보드에서 이 프로젝트를 엽니다.
-2. **Storage** 탭으로 이동합니다.
-3. **Create Database → Blob**을 선택합니다.
-4. Store 이름을 정하고 Access는 **Public**으로 설정합니다. 방문자의 브라우저가 이미지를 표시할 수 있어야 합니다.
-5. 생성된 Blob Store를 이 프로젝트에 연결하고 Production 및 Preview 환경을 선택합니다.
-6. Vercel이 프로젝트 환경 변수에 `BLOB_READ_WRITE_TOKEN`을 연결했는지 확인합니다.
+2. **Storage** 탭에서 **Create Database → Blob**을 선택합니다.
+3. 새 Blob Store의 Access는 **Public**으로 설정합니다. 방문자의 브라우저가 이미지 주소로 PNG를 표시해야 합니다.
+4. Blob Store를 이 프로젝트에 연결합니다.
+5. 연결 옵션에서 **Add a read-write token env var**를 선택해 `BLOB_READ_WRITE_TOKEN`을 추가합니다. 브라우저 직접 업로드 토큰을 발급하는 데 필요합니다.
+6. Production 환경을 선택하고 저장합니다.
 
 ### 2. 관리자 비밀번호 설정
 
@@ -55,4 +55,4 @@ npm run dev
 - Next.js 15.5.29
 - React 19.1.10
 - Vercel Blob 2.9.0
-- 별도 회원가입, 포인트, 사용자 계정, 데이터베이스 불필요
+- 별도 방문자 회원가입, 포인트, 사용자 계정, 데이터베이스 불필요
