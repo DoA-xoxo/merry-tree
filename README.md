@@ -1,3 +1,45 @@
-# Merry Tree Studio
+# 메리 트리 스튜디오 (Merry Tree Studio)
 
-Next.js app for decorating a Christmas tree with built-in presets and uploaded PNG assets. See the project files in `app/`.
+PNG 이미지로 나만의 크리스마스 트리를 꾸미고 완성 이미지를 저장하는 Next.js 앱입니다.
+
+## 주요 기능
+
+- 트리 모양 3종: 클래식, 슬림, 풍성한
+- 배경 프리셋 3종과 사용자 배경 PNG 업로드
+- 사용자 트리 PNG 업로드 및 선택창 썸네일 미리보기
+- 기본 오너먼트 스티커와 사용자 오너먼트 PNG 업로드
+- 오너먼트를 원하는 만큼 추가하고 드래그로 위치 조정
+- 반짝이 끈과 꼬마 전구 개별 ON/OFF
+- 사용자 반짝임 PNG 업로드, 썸네일 선택, 여러 효과 동시 적용
+- 완성한 트리를 1800 × 2000 PNG로 저장
+- 브라우저가 지원하면 PNG 파일 공유, 미지원 시 PNG 저장으로 대체
+
+## Vercel 배포
+
+1. Vercel에서 **Add New → Project**로 이동합니다.
+2. GitHub 계정에서 `DoA-xoxo/merry-tree` 저장소를 선택합니다.
+3. Framework Preset은 Next.js, Root Directory는 저장소 루트(`./`)로 둡니다.
+4. 별도 환경 변수 없이 Deploy를 누릅니다.
+
+## 이미지 업로드 안내
+
+- 트리, 배경, 오너먼트, 반짝임은 각각 PNG 파일을 여러 장 선택해 올릴 수 있습니다.
+- 파일은 개별 12MB 이하만 허용됩니다.
+- 업로드한 파일은 해당 선택창에 썸네일로 표시됩니다.
+- 업로드한 이미지는 브라우저 메모리에 보관되며 새로고침하거나 페이지를 닫으면 초기화됩니다. 영구 보관이나 다른 기기와의 동기화는 지원하지 않습니다.
+- 투명 배경 PNG를 사용하면 트리와 오너먼트가 자연스럽게 합성됩니다.
+
+## 로컬 실행
+
+```bash
+npm install
+npm run dev
+```
+
+브라우저에서 `http://localhost:3000`을 엽니다.
+
+## 기술 구성
+
+- Next.js 15
+- React 19
+- 별도 로그인, 포인트, 데이터베이스, API 키 불필요
