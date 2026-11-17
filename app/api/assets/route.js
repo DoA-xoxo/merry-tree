@@ -3,7 +3,7 @@ import { list } from "@vercel/blob";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const CATEGORIES = ["tree", "background", "ornament", "effect"];
+const CATEGORIES = ["tree", "topper", "background", "ornament", "effect"];
 
 function getDisplayName(pathname) {
   const fileName = pathname.split("/").pop() || "image.png";
