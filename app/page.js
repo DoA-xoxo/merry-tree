@@ -10,6 +10,23 @@ const GROUPS = [
   { id: "effect", title: "반짝임 이미지", description: "트리에 고정해서 적용하는 반짝임이에요." },
 ];
 
+async function imageToDataUrl(src) {
+  const response = await fetch(new URL(src, window.location.origin).href, {
+    cache: "no-store",
+    credentials: "same-origin",
+  });
+  if (!response.ok) {
+    throw new Error("트리 또는 장식 이미지를 불러오지 못했어요. 이미지 주소와 저장소 연결을 확인해 주세요.");
+  }
+  const blob = await response.blob();
+  return await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error("이미지를 PNG 저장용 데이터로 변환하지 못했어요."));
+    reader.readAsDataURL(blob);
+  });
+}
+
 async function createPngBlob(svgElement) {
   const clone = svgElement.cloneNode(true);
   clone.querySelectorAll(".selection-outline").forEach((node) => node.remove());
@@ -17,12 +34,17 @@ async function createPngBlob(svgElement) {
   clone.setAttribute("width", "1800");
   clone.setAttribute("height", "2000");
 
-  clone.querySelectorAll("image").forEach((node) => {
-    const href = node.getAttribute("href");
-    if (href && href.startsWith("/")) {
-      node.setAttribute("href", new URL(href, window.location.origin).href);
-    }
-  });
+  // SVG를 PNG로 바꿀 때 외부 이미지 주소가 누락되지 않도록 이미지 데이터를 SVG 안에 직접 포함해요.
+  const imageNodes = Array.from(clone.querySelectorAll("image"));
+  const imageDataCache = new Map();
+  await Promise.all(imageNodes.map(async (node) => {
+    const href = node.getAttribute("href") || node.getAttributeNS("http://www.w3.org/1999/xlink", "href");
+    if (!href || href.startsWith("data:")) return;
+    if (!imageDataCache.has(href)) imageDataCache.set(href, imageToDataUrl(href));
+    const dataUrl = await imageDataCache.get(href);
+    node.setAttribute("href", dataUrl);
+    node.removeAttributeNS("http://www.w3.org/1999/xlink", "href");
+  }));
 
   const source = new XMLSerializer().serializeToString(clone);
   const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
