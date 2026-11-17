@@ -104,8 +104,6 @@ function TreeCanvas({ svgRef, background, tree, topper, effects, ornaments, sele
   );
 }
 
-"use client";
-
 function AssetChoice({ item, active, onClick, compact = false }) {
   const [failed, setFailed] = useState(false);
   return (
@@ -398,7 +396,7 @@ export default function Home() {
               <div className="ornament-picker-grid">
                 {ornamentAssets.map((item) => (
                   <button key={item.id} type="button" className="ornament-choice" onClick={() => addOrnament(item)} title={item.name + " 추가"}>
-                    <span><img src={item.url} alt="" /></span><small>{item.name}</small>
+                    <span><img src={item.url} alt="" onError={() => handleAssetImageError(item)} /></span><small>{item.name}</small>
                   </button>
                 ))}
               </div>
@@ -413,7 +411,7 @@ export default function Home() {
               <div className="effect-picker-list">
                 {effectAssets.map((item) => (
                   <button key={item.id} type="button" className={"effect-choice " + (activeEffects.includes(item.id) ? "active" : "")} onClick={() => toggleEffect(item.id)}>
-                    <span className="effect-choice-thumb"><img src={item.url} alt="" /></span>
+                    <span className="effect-choice-thumb"><img src={item.url} alt="" onError={() => handleAssetImageError(item)} /></span>
                     <span className="effect-choice-name">{item.name}</span>
                     <span className="effect-choice-check">{activeEffects.includes(item.id) ? "✓ 적용 중" : "적용하기 +"}</span>
                   </button>
