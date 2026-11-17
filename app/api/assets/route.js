@@ -7,25 +7,21 @@ const CATEGORIES = ["tree", "topper", "background", "ornament", "effect"];
 
 function getDisplayName(pathname) {
   const fileName = pathname.split("/").pop() || "image.png";
-  const separator = fileName.indexOf("__");
+  const labelMarker = "__label__";
+  const markerIndex = fileName.indexOf(labelMarker);
 
-  if (separator > 0) {
-    const uploadId = fileName.slice(0, separator);
-    const encodedLabel = fileName.slice(separator + 2).replace(/\\.png$/i, "");
-
-    // New uploads store the user-entered Korean option label as base64url.
-    if (/^[0-9a-f-]{32,36}$/i.test(uploadId)) {
-      try {
-        const decoded = Buffer.from(encodedLabel, "base64url").toString("utf8").trim();
-        if (decoded && !decoded.includes("\\uFFFD")) return decoded;
-      } catch {}
-    }
-
-    // Keep labels for files uploaded before editable option names were added.
-    return encodedLabel.replace(/[_-]+/g, " ");
+  if (markerIndex >= 0) {
+    const encodedLabel = fileName.slice(markerIndex + labelMarker.length).replace(/\.png$/i, "");
+    try {
+      const decoded = Buffer.from(encodedLabel, "base64url").toString("utf8").trim();
+      if (decoded && !decoded.includes("\uFFFD")) return decoded;
+    } catch {}
   }
 
-  return fileName.replace(/\\.png$/i, "").replace(/[_-]+/g, " ");
+  // Legacy files keep the filename-derived label.
+  const separator = fileName.indexOf("__");
+  const legacyName = separator > 0 ? fileName.slice(separator + 2) : fileName;
+  return legacyName.replace(/\.png$/i, "").replace(/[_-]+/g, " ");
 }
 
 function getAccessMode(url) {
