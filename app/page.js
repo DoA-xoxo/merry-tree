@@ -17,6 +17,13 @@ async function createPngBlob(svgElement) {
   clone.setAttribute("width", "1800");
   clone.setAttribute("height", "2000");
 
+  clone.querySelectorAll("image").forEach((node) => {
+    const href = node.getAttribute("href");
+    if (href && href.startsWith("/")) {
+      node.setAttribute("href", new URL(href, window.location.origin).href);
+    }
+  });
+
   const source = new XMLSerializer().serializeToString(clone);
   const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
   const objectUrl = URL.createObjectURL(svgBlob);
