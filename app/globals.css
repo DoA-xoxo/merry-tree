@@ -265,3 +265,6 @@ button:focus-visible,a:focus-visible,input:focus-visible { outline:3px solid rgb
 @media(max-width:760px) {
   .tree-effect-row { grid-template-columns:1fr; gap:9px; }
 }
+
+.sparkle-toggle { flex:0 0 auto; padding:6px 10px; border:1px solid #e5ddd1; border-radius:99px; background:#fffefa; color:#999184; cursor:pointer; font-size:8px; transition:all .15s ease; }
+.sparkle-toggle.active { border-color:#c9b18e; background:#f7f0e5; color:#806044; }
