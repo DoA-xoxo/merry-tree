@@ -382,13 +382,13 @@ export default function Home() {
   return (
     <main className="app-shell">
       <header className="site-header">
-        <a className="brand-mark" href="/"><span className="brand-icon">✦</span><span>MERRY TREE-MAS</span></a>
+        <a className="brand-mark" href="/" aria-label="MERRY TREE-MAS"><img className="brand-wordmark" src="/merry-tree-mas.svg" alt="MERRY TREE-MAS" /></a>
         <a className="admin-shortcut" href="/admin">ADMINISTRATOR ↗</a>
       </header>
 
       <section className="intro">
         <div className="intro-kicker">✦ &nbsp; THE HODO THEATER &nbsp; ✦</div>
-        <h1>MERRY TREE-MAS</h1>
+        <h1 className="intro-wordmark-heading"><img className="intro-wordmark" src="/merry-tree-mas.svg" alt="MERRY TREE-MAS" /></h1>
         <p>오너먼트를 달고 나만의 크리스마스 트리를 완성해 보세요.</p>
       </section>
 
