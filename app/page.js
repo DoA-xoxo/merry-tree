@@ -330,9 +330,9 @@ export default function Home() {
       </header>
 
       <section className="intro">
-        <div className="intro-kicker">✦ &nbsp; A LITTLE WINTER MAGIC &nbsp; ✦</div>
+        <div className="intro-kicker">✦ &nbsp; THE HODO THEATER &nbsp; ✦</div>
         <h1>메리 트리 스튜디오</h1>
-        <p>준비된 이미지로 오너먼트를 달고 나만의 크리스마스 트리를 완성해 보세요.</p>
+        <p>오너먼트를 달고 나만의 크리스마스 트리를 완성해 보세요.</p>
       </section>
 
       <div className="workspace">
@@ -366,7 +366,7 @@ export default function Home() {
                 </div>
               ) : null}
             </div>
-            <div className="canvas-footer"><span>✦ &nbsp; MADE WITH YOUR OWN ARTWORK</span><span>{ornaments.length} ORNAMENT{ornaments.length === 1 ? "" : "S"}</span></div>
+            <div className="canvas-footer"><span>✦ &nbsp; MADE WITH YOUR OWN CHRISTMAS TREE</span><span>{ornaments.length} ORNAMENT{ornaments.length === 1 ? "" : "S"}</span></div>
           </div>
           <div className="preview-tip"><span>✧</span> 오너먼트를 드래그해 원하는 위치에 놓아 보세요.</div>
         </section>
@@ -452,15 +452,15 @@ export default function Home() {
           </section>
 
           <div className="export-section">
-            <div className="export-copy"><span>YOUR TREE IS READY?</span><strong>완성한 트리를 간직해 보세요.</strong></div>
+            <div className="export-copy"><span>OWN YOUR TREE</span><strong>완성한 트리를 간직해 보세요.</strong></div>
             <button className="download-button" type="button" onClick={downloadPng} disabled={busy}>↓ &nbsp; PNG 이미지 저장</button>
             <button className="share-button" type="button" onClick={sharePng} disabled={busy}>↗ &nbsp; 이미지 공유하기</button>
           </div>
-          <p className="privacy-note">로그인 없이 자유롭게 꾸미고 저장할 수 있어요. ♡</p>
+          <p className="privacy-note">자유롭게 꾸미고 저장할 수 있어요.</p>
           {message ? <div className="notice" role="status">{message}</div> : null}
         </aside>
       </div>
-      <footer className="site-footer">✦ &nbsp; MERRY TREE STUDIO &nbsp; · &nbsp; MADE FOR A COZY CHRISTMAS &nbsp; ✦</footer>
+      <footer className="site-footer">✦ &nbsp; MERRY TREE STUDIO &nbsp; · &nbsp; ⓒ胡桃劇場 &nbsp; ✦</footer>
     </main>
   );
 }
