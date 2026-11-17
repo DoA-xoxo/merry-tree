@@ -11,54 +11,91 @@ const GROUPS = [
 ];
 
 async function createPngBlob(svgElement) {
-  const clone = svgElement.cloneNode(true);
-  clone.querySelectorAll(".selection-outline").forEach((node) => node.remove());
-  clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-  clone.setAttribute("width", "1800");
-  clone.setAttribute("height", "2000");
+  const imageNodes = Array.from(svgElement.querySelectorAll("image"));
+  const bitmapCache = new Map();
+  const canvas = document.createElement("canvas");
+  canvas.width = 1800;
+  canvas.height = 2000;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("이미지 캔버스를 만들 수 없어요.");
 
-  // 큰 PNG를 base64 문자열로 바꾸지 않고 Blob URL로 연결해 메모리 사용과 변환 시간을 줄여요.
-  const imageNodes = Array.from(clone.querySelectorAll("image"));
-  const imageUrlCache = new Map();
-  const temporaryUrls = [];
-  try {
-    await Promise.all(imageNodes.map(async (node) => {
-      const href = node.getAttribute("href") || node.getAttributeNS("http://www.w3.org/1999/xlink", "href");
-      if (!href || href.startsWith("data:") || href.startsWith("blob:")) return;
-      if (!imageUrlCache.has(href)) {
-        imageUrlCache.set(href, (async () => {
-          const response = await fetch(new URL(href, window.location.origin).href, {
-            cache: "force-cache",
-            credentials: "same-origin",
+  const loadBitmap = async (href) => {
+    if (!bitmapCache.has(href)) {
+      bitmapCache.set(href, (async () => {
+        const response = await fetch(new URL(href, window.location.origin).href, {
+          cache: "force-cache",
+          credentials: "same-origin",
+        });
+        if (!response.ok) throw new Error("트리 또는 장식 이미지를 불러오지 못했어요. 이미지 주소와 저장소 연결을 확인해 주세요.");
+        const blob = await response.blob();
+        if (typeof createImageBitmap === "function") return createImageBitmap(blob);
+        const objectUrl = URL.createObjectURL(blob);
+        try {
+          const image = new Image();
+          image.src = objectUrl;
+          await new Promise((resolve, reject) => {
+            image.onload = resolve;
+            image.onerror = () => reject(new Error("이미지를 불러오지 못했어요."));
           });
-          if (!response.ok) throw new Error("트리 또는 장식 이미지를 불러오지 못했어요. 이미지 주소와 저장소 연결을 확인해 주세요.");
-          const objectUrl = URL.createObjectURL(await response.blob());
-          temporaryUrls.push(objectUrl);
-          return objectUrl;
-        })());
+          return image;
+        } finally {
+          URL.revokeObjectURL(objectUrl);
+        }
+      })());
+    }
+    return bitmapCache.get(href);
+  };
+
+  const drawImageFit = (bitmap, x, y, width, height, mode) => {
+    const sourceRatio = bitmap.width / bitmap.height;
+    const targetRatio = width / height;
+    let drawWidth = width;
+    let drawHeight = height;
+    if ((mode === "slice" && sourceRatio > targetRatio) || (mode !== "slice" && sourceRatio < targetRatio)) {
+      drawWidth = height * sourceRatio;
+    } else {
+      drawHeight = width / sourceRatio;
+    }
+    const drawX = x + (width - drawWidth) / 2;
+    const drawY = y + (height - drawHeight) / 2;
+    context.drawImage(bitmap, drawX * 2, drawY * 2, drawWidth * 2, drawHeight * 2);
+  };
+
+  // 배경은 SVG와 동일하게 기본 바탕색을 먼저 그려요.
+  context.fillStyle = "#f5f0e7";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+
+  try {
+    // 이미지들을 병렬로 읽되, 실제 캔버스에는 SVG의 앞뒤 순서대로 그려요.
+    const loaded = await Promise.all(imageNodes.map(async (node) => {
+      const href = node.getAttribute("href") || node.getAttributeNS("http://www.w3.org/1999/xlink", "href");
+      if (!href) return null;
+      const bitmap = await loadBitmap(href);
+      const x = Number(node.getAttribute("x") || 0);
+      const y = Number(node.getAttribute("y") || 0);
+      const width = Number(node.getAttribute("width") || 0);
+      const height = Number(node.getAttribute("height") || 0);
+      let offsetX = 0;
+      let offsetY = 0;
+      const transform = node.parentElement?.getAttribute("transform") || "";
+      const translate = transform.match(/translate\\(\\s*(-?[\\d.]+)[ ,]+(-?[\\d.]+)\\s*\\)/);
+      if (translate) {
+        offsetX = Number(translate[1]);
+        offsetY = Number(translate[2]);
       }
-      node.setAttribute("href", await imageUrlCache.get(href));
-      node.removeAttributeNS("http://www.w3.org/1999/xlink", "href");
+      return {
+        bitmap,
+        x: x + offsetX,
+        y: y + offsetY,
+        width,
+        height,
+        mode: (node.getAttribute("preserveAspectRatio") || "").includes("slice") ? "slice" : "meet",
+      };
     }));
 
-    const source = new XMLSerializer().serializeToString(clone);
-    const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
-    const svgUrl = URL.createObjectURL(svgBlob);
-    temporaryUrls.push(svgUrl);
-
-    const image = new Image();
-    image.src = svgUrl;
-    await new Promise((resolve, reject) => {
-      image.onload = resolve;
-      image.onerror = () => reject(new Error("꾸미기 이미지를 합성하지 못했어요. 이미지 로딩 오류가 있는지 확인하고 다시 시도해 주세요."));
+    loaded.forEach((item) => {
+      if (item) drawImageFit(item.bitmap, item.x, item.y, item.width, item.height, item.mode);
     });
-
-    const canvas = document.createElement("canvas");
-    canvas.width = 1800;
-    canvas.height = 2000;
-    const context = canvas.getContext("2d");
-    if (!context) throw new Error("이미지 캔버스를 만들 수 없어요.");
-    context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
     return await new Promise((resolve, reject) => {
       canvas.toBlob((blob) => {
@@ -67,7 +104,11 @@ async function createPngBlob(svgElement) {
       }, "image/png");
     });
   } finally {
-    temporaryUrls.forEach((url) => URL.revokeObjectURL(url));
+    bitmapCache.forEach((promise) => {
+      promise.then((bitmap) => {
+        if (typeof bitmap.close === "function") bitmap.close();
+      }).catch(() => {});
+    });
   }
 }
 
