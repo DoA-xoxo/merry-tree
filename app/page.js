@@ -346,10 +346,10 @@ export default function Home() {
           <div className="panel-header"><div><span className="section-eyebrow">LET'S DECORATE</span><h2>꾸미기 도구</h2></div><button className="reset-button" type="button" onClick={clearOrnaments}>장식 비우기 ↺</button></div>
 
           {assetError ? <div className="notice warning">{assetError}<a href="/admin">관리자 설정 확인 ↗</a></div> : null}
-          {hasPrivateAssetUrl ? <div className="notice warning">Blob 저장소가 Private으로 감지됐어요. 메인 화면에서 이미지를 바로 표시하려면 Public Blob 저장소가 필요해요. <a href="/admin">관리자 페이지에서 원본 주소 확인 ↗</a></div> : null}
+          {hasPrivateAssetUrl ? <div className="notice warning">Blob 이미지 주소를 브라우저가 직접 열 수 없어요. 저장소 연결과 Access 설정을 확인해 주세요. <a href="/admin">관리자 페이지에서 원본 주소 확인 ↗</a></div> : null}
           {imageErrorDetails.length ? (
             <div className="notice warning">
-              {imageErrorDetails.length}개 이미지가 브라우저에서 열리지 않아요. Blob 저장소의 Access가 Public인지 확인해 주세요.
+              {imageErrorDetails.length}개 이미지가 브라우저에서 열리지 않아요. 원본 이미지 링크를 열어 403 또는 404 오류인지 확인해 주세요.
               {imageErrorDetails.map((item) => <a key={item.id} href={item.url} target="_blank" rel="noreferrer">{item.name || "PNG 이미지"} 원본 열기 ↗</a>)}
             </div>
           ) : null}
