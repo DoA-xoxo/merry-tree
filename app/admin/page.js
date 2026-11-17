@@ -185,7 +185,7 @@ export default function AdminPage() {
         const uniqueName = (typeof crypto !== "undefined" && crypto.randomUUID)
           ? crypto.randomUUID()
           : String(Date.now()) + Math.random().toString(16).slice(2);
-        const pathname = "assets/" + category + "/" + uniqueName + "__" + encodeOptionName(name) + ".png";
+        const pathname = "assets/" + category + "/" + uniqueName + "__label__" + encodeOptionName(name) + ".png";
         await uploadPresigned(pathname, file, {
           access: "public",
           contentType: "image/png",
