@@ -171,7 +171,7 @@ export default function Home() {
       : current.concat({ id: item.id, name: item.name, url: item.url, isPublicUrl: item.isPublicUrl }));
   };
 
-  const hasPrivateAssetUrl = assets.some((item) => item.isPublicUrl === false);
+  const hasPrivateAssetUrl = assets.some((item) => item.isPublicUrl === false && item.isSignedUrl !== true);
 
   const addOrnament = (asset) => {
     const index = ornaments.length;
