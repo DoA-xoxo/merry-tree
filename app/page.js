@@ -66,7 +66,6 @@ function TreeCanvas({ svgRef, background, tree, topper, effects, ornaments, sele
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
-      onPointerLeave={onPointerUp}
     >
       <rect width="900" height="1000" fill="#f5f0e7" />
       {background ? (
@@ -223,18 +222,22 @@ export default function Home() {
       dy: point.y - item.y,
       x: item.x,
       y: item.y,
-      rect,
       element: event.currentTarget,
+      pointerId: event.pointerId,
     };
     setSelectedId(id);
-    if (svgRef.current?.setPointerCapture) svgRef.current.setPointerCapture(event.pointerId);
+    // 실제 오너먼트 요소가 포인터를 캡처해야 손가락이 SVG 경계를 벗어나도 드래그가 끊기지 않아요.
+    if (event.currentTarget?.setPointerCapture) event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const onPointerMove = (event) => {
     const drag = dragRef.current;
     if (!drag) return;
     event.preventDefault();
-    const point = getPoint(event, drag.rect);
+    // 모바일 브라우저가 합쳐 전달한 포인터 이동 이벤트 중 가장 최신 좌표를 사용해요.
+    const events = typeof event.getCoalescedEvents === "function" ? event.getCoalescedEvents() : [];
+    const latestEvent = events.length ? events[events.length - 1] : event;
+    const point = getPoint(latestEvent);
     const x = Math.max(45, Math.min(855, point.x - drag.dx));
     const y = Math.max(45, Math.min(955, point.y - drag.dy));
     drag.x = x;
