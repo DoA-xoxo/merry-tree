@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Delius&family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap");
 
 :root {
   --ink:#30453b; --muted:#92958c; --red:#a64e45; --cream:#FFF8EF;
@@ -16,13 +16,13 @@ button { color:inherit; }
 button:focus-visible,a:focus-visible,input:focus-visible { outline:3px solid rgba(166,78,69,.28); outline-offset:3px; }
 .app-shell { width:min(1440px,calc(100% - 72px)); margin:0 auto; padding:27px 0 25px; }
 .site-header { height:44px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(201,192,174,.45); padding:0 4px 16px; }
-.brand-mark,.admin-brand { display:inline-flex; align-items:center; gap:10px; color:#405347; text-decoration:none; font:600 12px/1 "DM Sans",sans-serif; letter-spacing:1.45px; }
+.brand-mark,.admin-brand { display:inline-flex; align-items:center; gap:10px; color:#405347; text-decoration:none; font:600 12px/1 "DM Sans",sans-serif; letter-spacing:1.45px; }\n.brand-wordmark { display:block; width:148px; height:auto; }\n.intro-wordmark-heading { margin:12px 0 7px; line-height:0; }\n.intro-wordmark { display:block; width:min( min(560px, 72vw), 100% ); height:auto; margin:0 auto; }
 .brand-mark b,.admin-brand b { color:#a5554b; }
 .brand-icon { display:grid; place-items:center; width:26px; height:26px; border:1px solid #d9c6a7; border-radius:50%; color:#a5554b; font-size:16px; }
 .admin-shortcut,.back-to-site { color:#9a7b61; text-decoration:none; font:600 9px/1 "DM Sans",sans-serif; letter-spacing:1.2px; }
 .intro { text-align:center; padding:37px 0 31px; }
 .intro-kicker,.admin-intro .intro-kicker { color:#ad8064; font:600 9px/1.4 "DM Sans",sans-serif; letter-spacing:2.4px; }
-.intro h1,.admin-intro h1 { margin:12px 0 7px; color:#31463b; font:700 clamp(27px,3vw,37px)/1.35 "Gowun Batang",serif; letter-spacing:-.9px; }
+.intro h1,.admin-intro h1 { margin:12px 0 7px; color:#31463b; font:700 clamp(27px,3vw,37px)/1.35 "Gowun Batang",serif; letter-spacing:-.9px; }\n.intro .intro-wordmark-heading { margin:12px 0 7px; }
 .intro p,.admin-intro p { margin:0; color:#8c9188; font-size:12px; }
 .workspace { display:grid; grid-template-columns:minmax(0,1fr) 390px; gap:22px; align-items:start; }
 .preview-column { min-width:0; }
@@ -193,7 +193,7 @@ button:focus-visible,a:focus-visible,input:focus-visible { outline:3px solid rgb
 @media(max-width:760px) {
   .app-shell { width:calc(100% - 28px); padding-top:17px; }
   .site-header { height:35px; padding-bottom:12px; }
-  .brand-mark { font-size:10px; letter-spacing:1px; }
+  .brand-mark { font-size:10px; letter-spacing:1px; }\n  .brand-wordmark { width:126px; }\n  .intro-wordmark { width:min(88vw, 500px); }
   .brand-icon { width:23px; height:23px; }
   .admin-shortcut { font-size:7px; letter-spacing:.8px; }
   .intro { padding:27px 0 22px; }
