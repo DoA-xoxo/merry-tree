@@ -1,15 +1,14 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap");
 
 :root {
-  --ink:#30453b; --muted:#92958c; --red:#a64e45; --cream:#fbf8f1;
+  --ink:#30453b; --muted:#92958c; --red:#a64e45; --cream:#FFF8EF;
   --line:#e9e3d7; --gold:#bd9b61;
 }
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; }
 body {
   margin:0; color:var(--ink);
-  background:radial-gradient(circle at 8% 5%,rgba(222,211,187,.2),transparent 25rem),
-    radial-gradient(circle at 92% 14%,rgba(204,219,205,.18),transparent 28rem),#f8f6f0;
+  background:#FFF8EF;
   font-family:"Noto Sans KR",sans-serif;
 }
 button,input { font:inherit; }
