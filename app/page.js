@@ -360,7 +360,7 @@ export default function Home() {
       const blob = await createPngBlob(svgRef.current);
       const file = new File([blob], "merry-tree-studio.png", { type: "image/png" });
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: "메리 트리 스튜디오", text: "내가 꾸민 크리스마스 트리!" });
+        await navigator.share({ files: [file], title: "MERRY TREE-MAS", text: "내가 꾸민 크리스마스 트리!" });
         setMessage("완성한 트리를 공유했어요.");
       } else {
         const url = URL.createObjectURL(blob);
@@ -382,13 +382,13 @@ export default function Home() {
   return (
     <main className="app-shell">
       <header className="site-header">
-        <a className="brand-mark" href="/"><span className="brand-icon">✦</span><span>MERRY TREE <b>STUDIO</b></span></a>
+        <a className="brand-mark" href="/"><span className="brand-icon">✦</span><span>MERRY TREE-MAS</span></a>
         <a className="admin-shortcut" href="/admin">ADMINISTRATOR ↗</a>
       </header>
 
       <section className="intro">
         <div className="intro-kicker">✦ &nbsp; THE HODO THEATER &nbsp; ✦</div>
-        <h1>메리 트리 스튜디오</h1>
+        <h1>MERRY TREE-MAS</h1>
         <p>오너먼트를 달고 나만의 크리스마스 트리를 완성해 보세요.</p>
       </section>
 
@@ -399,7 +399,7 @@ export default function Home() {
             <span className="live-pill"><i /> LIVE PREVIEW</span>
           </div>
           <div className="canvas-card">
-            <div className="canvas-topline"><span>✦ &nbsp; MERRY TREE STUDIO</span><span>DRAG TO DECORATE</span></div>
+            <div className="canvas-topline"><span>✦ &nbsp; MERRY TREE-MAS</span><span>DRAG TO DECORATE</span></div>
             <div className="scene-frame">
               <TreeCanvas
                 svgRef={svgRef}
@@ -518,7 +518,7 @@ export default function Home() {
           {message ? <div className="notice" role="status">{message}</div> : null}
         </aside>
       </div>
-      <footer className="site-footer">✦ &nbsp; MERRY TREE STUDIO &nbsp; · &nbsp; ⓒ胡桃劇場 &nbsp; ✦</footer>
+      <footer className="site-footer">✦ &nbsp; MERRY TREE-MAS &nbsp; · &nbsp; ⓒ胡桃劇場 &nbsp; ✦</footer>
     </main>
   );
 }
