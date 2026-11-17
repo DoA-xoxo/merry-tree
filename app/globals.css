@@ -157,6 +157,28 @@ button:focus-visible,a:focus-visible,input:focus-visible { outline:3px solid rgb
 .upload-progress { display:flex; flex-direction:column; gap:7px; margin:0 0 12px; color:#8b8b7f; font-size:8px; }
 .upload-progress i { height:5px; overflow:hidden; border-radius:99px; background:#eee9df; }
 .upload-progress i b { display:block; height:100%; border-radius:99px; background:#8b9d82; transition:width .15s ease; }
+.pending-upload-panel { margin-top:12px; padding:13px; border:1px solid #e7dccb; border-radius:9px; background:#fdfaf4; }
+.pending-upload-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:10px; }
+.pending-upload-heading > div { display:flex; flex-direction:column; gap:4px; }
+.pending-upload-heading strong { color:#586456; font-size:10px; }
+.pending-upload-heading small { color:#9e9b90; font-size:8px; line-height:1.5; }
+.pending-upload-heading > button { padding:4px 8px; border:1px solid #e7dfd3; border-radius:5px; background:#fffefa; color:#98745c; font-size:8px; cursor:pointer; }
+.pending-upload-list { display:grid; gap:8px; }
+.pending-upload-row { display:grid; grid-template-columns:minmax(0,1fr) minmax(150px,.9fr) 25px; align-items:center; gap:9px; padding:9px; border:1px solid #eee7dc; border-radius:7px; background:#fffefa; }
+.pending-file-info { min-width:0; display:flex; align-items:center; gap:8px; }
+.pending-file-icon { flex:0 0 32px; width:32px; height:32px; display:grid; place-items:center; border-radius:6px; background:#f3eee5; color:#a67b59; font:700 8px/1 "DM Sans",sans-serif; }
+.pending-file-info > div { min-width:0; display:flex; flex-direction:column; gap:3px; }
+.pending-file-info strong { overflow:hidden; color:#657064; font-size:8px; font-weight:600; text-overflow:ellipsis; white-space:nowrap; }
+.pending-file-info small { color:#aaa397; font-size:7px; }
+.pending-name-field { min-width:0; display:flex; flex-direction:column; gap:4px; }
+.pending-name-field > span { color:#8e877b; font-size:8px; }
+.pending-name-field input { width:100%; height:32px; min-width:0; padding:0 8px; border:1px solid #e5ddd1; border-radius:5px; background:#fff; color:#455448; font-size:9px; }
+.pending-name-field input:focus { border-color:#bd9b74; outline:2px solid rgba(189,155,116,.17); }
+.pending-remove-button { width:23px; height:23px; display:grid; place-items:center; padding:0 0 2px; border:1px solid #eee5da; border-radius:50%; background:#fffefa; color:#a16d5b; font-size:15px; cursor:pointer; }
+.pending-upload-footer { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:11px; }
+.pending-upload-footer small { color:#aaa397; font-size:8px; }
+.pending-confirm-button { min-height:34px; padding:0 12px; border:1px solid #9b5148; border-radius:6px; background:#a45148; color:#fffaf4; font-size:9px; font-weight:700; cursor:pointer; }
+.pending-confirm-button:disabled { opacity:.55; cursor:wait; }
 .admin-toast { position:fixed; right:22px; bottom:22px; z-index:20; max-width:min(420px,calc(100% - 44px)); padding:12px 16px; border:1px solid #dce4d5; border-radius:8px; background:#f4f7ef; color:#61785c; box-shadow:0 8px 24px rgba(45,60,45,.12); font-size:10px; }
 .admin-error { margin-top:12px; padding:9px 11px; border-radius:6px; background:#f8eeeb; color:#a34f45; font-size:9px; line-height:1.55; }
 .admin-error-floating { position:fixed; right:22px; bottom:22px; z-index:21; max-width:min(420px,calc(100% - 44px)); box-shadow:0 8px 24px rgba(45,60,45,.12); }
@@ -208,6 +230,9 @@ button:focus-visible,a:focus-visible,input:focus-visible { outline:3px solid rgb
   .admin-asset-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
   .admin-asset-preview { height:105px; }
   .admin-footer-note { font-size:7px; line-height:1.6; text-align:left; }
+  .pending-upload-row { grid-template-columns:minmax(0,1fr) minmax(110px,.85fr) 23px; gap:6px; padding:7px; }
+  .pending-upload-footer { align-items:flex-start; flex-direction:column; }
+  .pending-confirm-button { width:100%; }
 }
 @media(max-width:390px) {
   .intro h1 { font-size:24px; }
@@ -219,4 +244,7 @@ button:focus-visible,a:focus-visible,input:focus-visible { outline:3px solid rgb
   .admin-category-heading { align-items:flex-start; }
   .admin-category-heading p { max-width:175px; }
   .admin-asset-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .pending-upload-row { grid-template-columns:minmax(0,1fr) 23px; }
+  .pending-name-field { grid-column:1 / 2; grid-row:2; }
+  .pending-remove-button { grid-column:2; grid-row:1; }
 }
