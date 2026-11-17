@@ -44,7 +44,7 @@ export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [assets, setAssets] = useState([]);
-  const hasPrivateAssetUrl = assets.some((asset) => asset.isPublicUrl === false);
+  const hasPrivateAssetUrl = assets.some((asset) => asset.isPublicUrl === false && asset.isSignedUrl !== true);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [busyCategory, setBusyCategory] = useState("");
