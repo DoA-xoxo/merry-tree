@@ -49,7 +49,7 @@ export async function GET() {
     const result = await list({ prefix: "assets/", limit: 1000 });
     let treeEffectAssignments = {};
     try {
-      const settings = await get("settings/tree-effects.json", { access: "public" });
+      const settings = await get("settings/tree-effects.json", { access: "private" });
       if (settings?.statusCode === 200 && settings.stream) {
         const saved = await new Response(settings.stream).json();
         if (saved && typeof saved === "object" && !Array.isArray(saved)) treeEffectAssignments = saved;
