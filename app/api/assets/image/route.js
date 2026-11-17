@@ -40,7 +40,8 @@ export async function GET(request) {
     }
 
     const headers = new Headers({
-      "Content-Type": result.blob.contentType || "image/png",
+      "Content-Type": "image/png",
+      "Content-Disposition": "inline",
       "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
       "X-Content-Type-Options": "nosniff",
       "ETag": result.blob.etag,
