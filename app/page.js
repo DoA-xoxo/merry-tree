@@ -199,7 +199,7 @@ export default function Home() {
       name: asset.name,
       x: Math.max(120, Math.min(780, 450 + Math.cos(angle) * radius)),
       y: 275 + (index % 7) * 83 + Math.sin(angle) * 25,
-      size: 72,
+      size: 108,
     }));
     setSelectedId(id);
   };
