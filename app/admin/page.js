@@ -30,7 +30,8 @@ function AdminAssetPreview({ asset }) {
       {failed ? (
         <div className="admin-image-error">
           <strong>이미지를 불러오지 못했어요.</strong>
-          <a href={asset.url} target="_blank" rel="noreferrer">원본 이미지 열기 ↗</a>
+          <a href={asset.url} target="_blank" rel="noreferrer">사이트 이미지 주소 열기 ↗</a>
+          {asset.originalUrl ? <a href={asset.originalUrl} target="_blank" rel="noreferrer">Blob 원본 주소 열기 ↗</a> : null}
         </div>
       ) : (
         <img src={asset.url} alt={asset.name} onError={() => setFailed(true)} />
