@@ -48,7 +48,7 @@ async function createPngBlob(svgElement) {
   }
 }
 
-function TreeCanvas({ svgRef, background, tree, topper, effects, ornaments, selectedId, onPointerDown, onPointerMove, onPointerUp }) {
+function TreeCanvas({ svgRef, background, tree, topper, effects, ornaments, selectedId, onImageError, onPointerDown, onPointerMove, onPointerUp }) {
   return (
     <svg
       ref={svgRef}
@@ -62,7 +62,7 @@ function TreeCanvas({ svgRef, background, tree, topper, effects, ornaments, sele
     >
       <rect width="900" height="1000" fill="#f5f0e7" />
       {background ? (
-        <image href={background.url} crossOrigin="anonymous" x="0" y="0" width="900" height="1000" preserveAspectRatio="xMidYMid slice" />
+        <image href={background.url} x="0" y="0" width="900" height="1000" preserveAspectRatio="xMidYMid slice" onError={() => onImageError(background)} />
       ) : (
         <g>
           <rect width="900" height="1000" fill="#f2eee5" />
@@ -93,6 +93,7 @@ function TreeCanvas({ svgRef, background, tree, topper, effects, ornaments, sele
             width={item.size}
             height={item.size}
             preserveAspectRatio="xMidYMid meet"
+            onError={() => onImageError(item)}
           />
           {selectedId === item.id ? (
             <circle className="selection-outline" r={item.size * 0.68} fill="none" stroke="#a96c57" strokeWidth="4" strokeDasharray="9 7" />
@@ -103,10 +104,15 @@ function TreeCanvas({ svgRef, background, tree, topper, effects, ornaments, sele
   );
 }
 
+"use client";
+
 function AssetChoice({ item, active, onClick, compact = false }) {
+  const [failed, setFailed] = useState(false);
   return (
     <button type="button" className={"asset-choice " + (active ? "active" : "") + (compact ? " compact" : "")} onClick={onClick}>
-      <span className="asset-choice-thumb"><img src={item.url} alt="" /></span>
+      <span className="asset-choice-thumb">
+        {failed ? <span className="asset-image-failed">이미지<br/>불러오기 실패</span> : <img src={item.url} alt="" onError={() => setFailed(true)} />}
+      </span>
       <span className="asset-choice-name">{item.name || "이름 없는 PNG"}</span>
       {active ? <span className="asset-choice-check">✓</span> : null}
     </button>
@@ -117,6 +123,7 @@ export default function Home() {
   const [assets, setAssets] = useState([]);
   const [loadingAssets, setLoadingAssets] = useState(true);
   const [assetError, setAssetError] = useState("");
+  const [imageErrorDetails, setImageErrorDetails] = useState([]);
   const [treeId, setTreeId] = useState("");
   const [topperId, setTopperId] = useState("");
   const [backgroundId, setBackgroundId] = useState("");
@@ -147,6 +154,7 @@ export default function Home() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "이미지 목록을 불러오지 못했어요.");
       setAssets(data.assets || []);
+      setImageErrorDetails([]);
       setAssetError("");
     } catch (error) {
       setAssetError(error.message || "이미지 목록을 불러오지 못했어요.");
@@ -158,6 +166,14 @@ export default function Home() {
   useEffect(() => {
     refreshAssets();
   }, []);
+
+  const handleAssetImageError = (item) => {
+    setImageErrorDetails((current) => current.some((entry) => entry.id === item.id)
+      ? current
+      : current.concat({ id: item.id, name: item.name, url: item.url, isPublicUrl: item.isPublicUrl }));
+  };
+
+  const hasPrivateAssetUrl = assets.some((item) => item.isPublicUrl === false);
 
   const addOrnament = (asset) => {
     const index = ornaments.length;
@@ -309,6 +325,7 @@ export default function Home() {
                 effects={appliedEffects}
                 ornaments={ornaments}
                 selectedId={selectedId}
+                onImageError={handleAssetImageError}
                 onPointerDown={onPointerDown}
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
@@ -331,6 +348,13 @@ export default function Home() {
           <div className="panel-header"><div><span className="section-eyebrow">LET'S DECORATE</span><h2>꾸미기 도구</h2></div><button className="reset-button" type="button" onClick={clearOrnaments}>장식 비우기 ↺</button></div>
 
           {assetError ? <div className="notice warning">{assetError}<a href="/admin">관리자 설정 확인 ↗</a></div> : null}
+          {hasPrivateAssetUrl ? <div className="notice warning">Blob 저장소가 Private으로 감지됐어요. 메인 화면에서 이미지를 바로 표시하려면 Public Blob 저장소가 필요해요. <a href="/admin">관리자 페이지에서 원본 주소 확인 ↗</a></div> : null}
+          {imageErrorDetails.length ? (
+            <div className="notice warning">
+              {imageErrorDetails.length}개 이미지가 브라우저에서 열리지 않아요. Blob 저장소의 Access가 Public인지 확인해 주세요.
+              {imageErrorDetails.map((item) => <a key={item.id} href={item.url} target="_blank" rel="noreferrer">{item.name || "PNG 이미지"} 원본 열기 ↗</a>)}
+            </div>
+          ) : null}
 
           <section className="tool-section">
             <div className="tool-title-row"><h3><span className="tool-number">01</span> 트리 선택</h3><span className="tool-caption">TREE PNG</span></div>
