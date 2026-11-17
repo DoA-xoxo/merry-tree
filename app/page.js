@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 const GROUPS = [
   { id: "tree", title: "트리 이미지", description: "관리자가 등록한 트리 중 하나를 선택해요." },
+  { id: "topper", title: "트리 꼭대기 장식", description: "나무 맨 위에 고정해서 붙이는 장식이에요." },
   { id: "background", title: "배경 이미지", description: "트리 뒤에 깔릴 배경을 선택해요." },
   { id: "ornament", title: "오너먼트", description: "이미지를 누르면 트리에 장식이 추가돼요." },
   { id: "effect", title: "반짝임 이미지", description: "트리에 고정해서 적용하는 반짝임이에요." },
@@ -47,7 +48,7 @@ async function createPngBlob(svgElement) {
   }
 }
 
-function TreeCanvas({ svgRef, background, tree, effects, ornaments, selectedId, onPointerDown, onPointerMove, onPointerUp }) {
+function TreeCanvas({ svgRef, background, tree, topper, effects, ornaments, selectedId, onPointerDown, onPointerMove, onPointerUp }) {
   return (
     <svg
       ref={svgRef}
@@ -70,6 +71,9 @@ function TreeCanvas({ svgRef, background, tree, effects, ornaments, selectedId, 
       )}
       {tree ? (
         <image href={tree.url} crossOrigin="anonymous" x="55" y="45" width="790" height="900" preserveAspectRatio="xMidYMid meet" />
+      ) : null}
+      {topper ? (
+        <image href={topper.url} crossOrigin="anonymous" x="365" y="8" width="170" height="170" preserveAspectRatio="xMidYMid meet" pointerEvents="none" />
       ) : null}
       {effects.map((item) => (
         <image key={item.id} href={item.url} crossOrigin="anonymous" x="55" y="45" width="790" height="900" preserveAspectRatio="xMidYMid meet" pointerEvents="none" />
@@ -114,6 +118,7 @@ export default function Home() {
   const [loadingAssets, setLoadingAssets] = useState(true);
   const [assetError, setAssetError] = useState("");
   const [treeId, setTreeId] = useState("");
+  const [topperId, setTopperId] = useState("");
   const [backgroundId, setBackgroundId] = useState("");
   const [ornaments, setOrnaments] = useState([]);
   const [activeEffects, setActiveEffects] = useState([]);
@@ -125,11 +130,13 @@ export default function Home() {
   const serialRef = useRef(0);
 
   const trees = useMemo(() => assets.filter((item) => item.category === "tree"), [assets]);
+  const toppers = useMemo(() => assets.filter((item) => item.category === "topper"), [assets]);
   const backgrounds = useMemo(() => assets.filter((item) => item.category === "background"), [assets]);
   const ornamentAssets = useMemo(() => assets.filter((item) => item.category === "ornament"), [assets]);
   const effectAssets = useMemo(() => assets.filter((item) => item.category === "effect"), [assets]);
 
   const selectedTree = trees.find((item) => item.id === treeId) || trees[0] || null;
+  const selectedTopper = topperId === "__none__" ? null : (toppers.find((item) => item.id === topperId) || toppers[0] || null);
   const selectedBackground = backgrounds.find((item) => item.id === backgroundId) || backgrounds[0] || null;
   const appliedEffects = effectAssets.filter((item) => activeEffects.includes(item.id));
 
@@ -298,6 +305,7 @@ export default function Home() {
                 svgRef={svgRef}
                 background={selectedBackground}
                 tree={selectedTree}
+                topper={selectedTopper}
                 effects={appliedEffects}
                 ornaments={ornaments}
                 selectedId={selectedId}
@@ -334,7 +342,24 @@ export default function Home() {
           </section>
 
           <section className="tool-section">
-            <div className="tool-title-row"><h3><span className="tool-number">02</span> 배경 선택</h3><span className="tool-caption">BACKGROUND PNG</span></div>
+            <div className="tool-title-row"><h3><span className="tool-number">02</span> 트리 꼭대기 장식</h3><span className="tool-caption">TOPPER PNG</span></div>
+            <p className="tool-description">트리 맨 위에 고정해서 붙일 장식을 선택해요.</p>
+            {toppers.length ? (
+              <>
+                <div className="topper-picker-grid">
+                  <button type="button" className={"topper-choice topper-none " + (!selectedTopper ? "active" : "")} onClick={() => setTopperId("__none__")}>
+                    <span className="topper-none-icon">×</span><small>사용 안 함</small>
+                  </button>
+                  {toppers.map((item) => (
+                    <AssetChoice key={item.id} item={item} active={selectedTopper?.id === item.id} onClick={() => setTopperId(item.id)} />
+                  ))}
+                </div>
+              </>
+            ) : <p className="empty-copy">관리자 페이지에서 트리 꼭대기 장식 PNG를 등록하면 여기에 선택지가 생겨요.</p>}
+          </section>
+
+          <section className="tool-section">
+            <div className="tool-title-row"><h3><span className="tool-number">03</span> 배경 선택</h3><span className="tool-caption">BACKGROUND PNG</span></div>
             {backgrounds.length ? (
               <div className="asset-picker-grid">
                 {backgrounds.map((item) => <AssetChoice key={item.id} item={item} active={selectedBackground?.id === item.id} onClick={() => setBackgroundId(item.id)} />)}
@@ -343,7 +368,7 @@ export default function Home() {
           </section>
 
           <section className="tool-section">
-            <div className="tool-title-row"><h3><span className="tool-number">03</span> 오너먼트</h3><span className="tool-caption">ORNAMENT PNG</span></div>
+            <div className="tool-title-row"><h3><span className="tool-number">04</span> 오너먼트</h3><span className="tool-caption">ORNAMENT PNG</span></div>
             <p className="tool-description">오너먼트를 누르면 트리에 하나씩 추가돼요.</p>
             {ornamentAssets.length ? (
               <div className="ornament-picker-grid">
@@ -358,7 +383,7 @@ export default function Home() {
           </section>
 
           <section className="tool-section effect-section">
-            <div className="tool-title-row"><h3><span className="tool-number">04</span> 반짝임 더하기</h3><span className="tool-caption">SPARKLE PNG</span></div>
+            <div className="tool-title-row"><h3><span className="tool-number">05</span> 반짝임 더하기</h3><span className="tool-caption">SPARKLE PNG</span></div>
             <p className="tool-description">선택한 반짝임은 트리에 고정되어 적용돼요.</p>
             {effectAssets.length ? (
               <div className="effect-picker-list">
