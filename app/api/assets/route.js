@@ -1,4 +1,4 @@
-import { list } from "@vercel/blob";
+import { get, list } from "@vercel/blob";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -47,6 +47,14 @@ export async function GET() {
 
   try {
     const result = await list({ prefix: "assets/", limit: 1000 });
+    let treeEffectAssignments = {};
+    try {
+      const settings = await get("settings/tree-effects.json", { access: "public" });
+      if (settings?.statusCode === 200 && settings.stream) {
+        const saved = await new Response(settings.stream).json();
+        if (saved && typeof saved === "object" && !Array.isArray(saved)) treeEffectAssignments = saved;
+      }
+    } catch {}
     const assets = result.blobs.map((blob) => {
       const parts = blob.pathname.split("/");
       const category = parts[1];
@@ -73,7 +81,7 @@ export async function GET() {
     assets.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
 
     return Response.json(
-      { assets, configured: true },
+      { assets, treeEffectAssignments, configured: true },
       { headers: { "Cache-Control": "no-store, max-age=0" } },
     );
   } catch (error) {
