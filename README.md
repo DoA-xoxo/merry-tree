@@ -27,13 +27,14 @@
 
 1. Vercel 대시보드에서 `merry-tree` 프로젝트를 엽니다.
 2. **Storage** 탭에서 생성한 Blob Store를 선택합니다.
-3. Blob Store의 **Projects** 탭에서 `merry-tree` 프로젝트가 연결되어 있는지 확인합니다.
-4. 프로젝트의 연결 환경에 **Production**이 포함되어 있어야 합니다. Preview 배포에서도 사용하려면 Preview도 선택합니다.
-5. OIDC 기본 연결은 다음 변수를 자동으로 제공합니다.
+3. Blob Store의 Access가 **Public**인지 확인합니다. 이미지가 메인 사이트 방문자에게 직접 표시되어야 하므로 Public이어야 합니다.
+4. Blob Store의 **Projects** 탭에서 `merry-tree` 프로젝트가 연결되어 있는지 확인합니다.
+5. 프로젝트의 연결 환경에 **Production**이 포함되어 있어야 합니다. Preview 배포에서도 사용하려면 Preview도 선택합니다.
+6. OIDC 기본 연결은 다음 변수를 자동으로 제공합니다.
    - `BLOB_STORE_ID`
    - `VERCEL_OIDC_TOKEN`
    - `BLOB_WEBHOOK_PUBLIC_KEY`
-6. 이 프로젝트는 `handleUploadPresigned`를 사용하므로 OIDC 연결로 업로드할 수 있습니다. 별도의 `BLOB_READ_WRITE_TOKEN`은 필요하지 않습니다.
+7. 이 프로젝트는 `handleUploadPresigned`를 사용하므로 OIDC 연결로 업로드할 수 있습니다. 별도의 `BLOB_READ_WRITE_TOKEN`은 필요하지 않습니다.
 
 프로젝트가 이미 연결되어 있다는 메시지가 나오면 중복 연결을 만들 필요가 없습니다. Blob Store의 **Projects** 탭에서 기존 `merry-tree` 연결 오른쪽의 메뉴(⋯) → **Update Project Connection**을 열고 Production 환경이 선택되어 있는지 확인한 다음 저장합니다.
 
