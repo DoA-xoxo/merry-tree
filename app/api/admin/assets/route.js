@@ -16,10 +16,12 @@ export async function DELETE(request) {
     return NextResponse.json({ error: "삭제할 이미지를 확인할 수 없어요." }, { status: 400 });
   }
 
-  if (
-    typeof pathname !== "string" ||
-    !/^assets\/(tree|background|ornament|effect)\/[A-Za-z0-9._-]+\.png$/i.test(pathname)
-  ) {
+  const parts = typeof pathname === "string" ? pathname.split("/") : [];
+  const category = parts[1];
+  const fileName = parts[2] || "";
+  if (parts.length !== 3 || parts[0] !== "assets" ||
+      !["tree", "background", "ornament", "effect"].includes(category) ||
+      !fileName.toLowerCase().endsWith(".png") || !/^[A-Za-z0-9._-]+$/.test(fileName)) {
     return NextResponse.json({ error: "삭제할 이미지 경로가 올바르지 않아요." }, { status: 400 });
   }
 
