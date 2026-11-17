@@ -78,7 +78,7 @@ async function createPngBlob(svgElement) {
       let offsetX = 0;
       let offsetY = 0;
       const transform = node.parentElement?.getAttribute("transform") || "";
-      const translate = transform.match(/translate\\(\\s*(-?[\\d.]+)[ ,]+(-?[\\d.]+)\\s*\\)/);
+      const translate = transform.match(/translate\(\s*(-?[\d.]+)[ ,]+(-?[\d.]+)\s*\)/);
       if (translate) {
         offsetX = Number(translate[1]);
         offsetY = Number(translate[2]);
